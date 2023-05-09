@@ -21,10 +21,11 @@ $upcomingLesson = current($allLessons);
                         <?php echo Label::getLabel('LBL_NEXT_LESSON:'); ?> <date class=" bold-600"> <?php echo date('Y-m-d', $upcomingLesson['ordles_starttime_unix']); ?></date> <?php echo Label::getLabel('LBL_AT'); ?> <time class=". bold-600"><?php echo date('H:i', $upcomingLesson['ordles_starttime_unix']); ?></time>
                         <?php echo Label::getLabel('LBL_WITH'); ?>
                         <div class="avtar-meta display-inline">
+                            
+                            <?php echo $upcomingLesson['first_name'] . ' ' . $upcomingLesson['last_name']; ?>
                             <span class="avtar avtar--xsmall display-inline margin-right-2" data-title="<?php echo CommonHelper::getFirstChar($upcomingLesson['first_name']); ?>">
                                 <img src="<?php echo FatCache::getCachedUrl(MyUtility::makeUrl('Image', 'show', [Afile::TYPE_USER_PROFILE_IMAGE, $upcomingLesson['user_id'], Afile::SIZE_SMALL], CONF_WEBROOT_FRONT_URL),CONF_DEF_CACHE_TIME, '.jpg'); ?>" />
                             </span>
-                            <?php echo $upcomingLesson['first_name'] . ' ' . $upcomingLesson['last_name']; ?>
                         </div>
                     </div>
                 </div>
@@ -32,6 +33,9 @@ $upcomingLesson = current($allLessons);
         </div>
         <div class="col-lg-4 col-sm-6">
             <div class="upcoming-lesson-action d-flex align-items-center justify-content-between justify-content-sm-end">
+                <?php if ($userType == 2) { ?>
+                <a href="https://www.thelessonspace.com/demo" target="_blank" class="btn bg-secondary mr-2">Classroom practice</a>
+                <?php } ?>
                 <div class="timer margin-right-4">
                     <div class="timer__media">
                         <span><svg class="icon icon--clock icon--small">

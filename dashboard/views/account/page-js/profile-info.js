@@ -122,11 +122,28 @@ $(document).ready(function () {
             $(dv).html(t);
         });
     };
+    stripeconnectform = function () {
+        fcom.ajax(fcom.makeUrl('Account', 'stripeConnectForm'), '', function (t) {
+            $(dv).html(t);
+        }, {failed: true});
+    };
     setUpBankInfo = function (frm) {
         if (!$(frm).validate()) {
             return;
         }
         fcom.updateWithAjax(fcom.makeUrl('Account', 'setUpBankInfo'), fcom.frmData(frm), function (t) { });
+    };
+    setupStripeConnectInfo = function (frm) {
+        // console.log(frm);
+        // if (!$(frm).validate()) {
+        //     return false;
+        // }
+        fcom.updateWithAjax(fcom.makeUrl('Account', 'setupStripeConnectInfo'), fcom.frmData(frm), function (t) { 
+            if(t.status == 1){
+                window.location.href = t.msg
+            }
+            
+        }, {failed: true});
     };
     paypalEmailAddressForm = function () {
         fcom.ajax(fcom.makeUrl('Account', 'paypalEmailAddressForm'), '', function (t) {
@@ -456,5 +473,14 @@ $(document).ready(function () {
             $("input[name='" + field + "']").attr("type", "text");
             $(e).html($(e).attr("data-hide-caption"));
         }
+    };
+    expandTuterPersonal = function(){
+        $.facebox('<iframe width="100%" height="600px" src="https://www.youtube.com/embed/TvpBw0vGfDg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" class="mb-4"></iframe>', 'facebox-large');
+    };
+    expandManageSubject = function(){
+        $.facebox('<iframe width="100%" height="600px" src="https://www.youtube.com/embed/EnzIR5vAVbE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" class="mb-4"></iframe>', 'facebox-large');
+    };
+    expandManageSkill = function(){
+        $.facebox('<iframe width="100%" height="600px" src="https://www.youtube.com/embed/DwNFv7GIKEY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" class="mb-4"></iframe>', 'facebox-large');
     };
 })();

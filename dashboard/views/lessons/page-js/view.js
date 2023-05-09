@@ -25,6 +25,11 @@
             });
         }
     };
+    endLessonwithoutconfirm = function (lessonId) {
+            fcom.ajax(fcom.makeUrl('Lessons', 'endMeeting'), { lessonId: lessonId }, function (response) {
+                reloadPage(3000);
+            });
+    };
     checkLessonStatus = function (lessonId, currentStatus) {
         if (typeof checkLessonStatusVar != "undefined") {
             return;

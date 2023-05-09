@@ -22,8 +22,8 @@ class GroupClassesController extends MyAppController
     /**
      * Render Group Classes|Packages
      */
-    public function index()
-    {
+    public function index(){
+		
         $searchSession = $_SESSION[AppConstant::SEARCH_SESSION] ?? [];
         $frm = GroupClassSearch::getSearchForm($this->siteLangId);
         $frm->fill(FatApp::getPostedData() + $searchSession);

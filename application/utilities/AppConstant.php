@@ -57,7 +57,7 @@ class AppConstant
     const CVV_NO_REGEX = "^[0-9]{3,4}$";
     const CLASS_TYPE_GROUP = 'group';
     const CLASS_TYPE_1_TO_1 = '1to1';
-    const INTRODUCTION_VIDEO_LINK_REGEX = "^(https|http):\/\/(?:www\.)?youtube.com\/embed\/[A-z0-9]+";
+    const INTRODUCTION_VIDEO_LINK_REGEX = "^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*(?:[&\/\#].*)?$";
     const DATE_TIME_REGEX = "(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})";
     const PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&_-])[A-Za-z\d@$!%*#?&_-]{8,20}$";
     const URL_REGEX = "(?=.{5,253}$)((http|https):\/\/)(www.)?[a-zA-Z0-9@:%._\\+~#?&\/\/=-]{2,253}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&\/\/=]*)";
@@ -69,6 +69,7 @@ class AppConstant
     const VIEW_SHORT = 3;
     const VIEW_DASHBOARD_LISTING = 4;
     const SEARCH_SESSION = 'SEARCH_SESSION';
+	const TWO_FACTOR_AUTH_ID = 'TWO_FACTOR_AUTH_ID';												
 
     /**
      * Return Array Value
@@ -106,11 +107,11 @@ class AppConstant
      * @param int $key
      * @return string|array
      */
-    public static function getActiveArr(int $key = null)
+    public static function getActiveArr(int $key = null, int $langId = 0)
     {
         $arr = [
-            static::ACTIVE => Label::getLabel('LBL_ACTIVE'),
-            static::INACTIVE => Label::getLabel('LBL_INACTIVE')
+            static::ACTIVE => Label::getLabel('LBL_ACTIVE', $langId),
+            static::INACTIVE => Label::getLabel('LBL_INACTIVE', $langId)
         ];
         return static::returArrValue($arr, $key);
     }
@@ -388,4 +389,18 @@ class AppConstant
         return $arr;
     }
 
+     /* Get Session Types
+     * 
+     * @param int $key
+     * @return string|array
+     */
+    public static function getSessionTypes(int $key = null)
+    {
+        $arr = [
+            static::LESSON => Label::getLabel('LBL_LESSON'),
+            static::GCLASS => Label::getLabel('LBL_GROUP_CLASS'),
+            static::COURSE => Label::getLabel('LBL_COURSE'),
+        ];
+        return static::returArrValue($arr, $key);
+    }  
 }

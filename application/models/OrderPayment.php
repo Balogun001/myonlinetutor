@@ -1,5 +1,7 @@
 <?php
 
+use Twilio\Rest\Client;
+
 /**
  * This class is used to handle Order Payment
  * 
@@ -8,9 +10,14 @@
  */
 class OrderPayment extends FatModel
 {
+    const DB_TBL_USER_SETTINGS = 'tbl_user_settings';
 
     private $order;
     private $orderId;
+    private $account_sid;
+    private $auth_token;
+    private  $twilio_number;
+    private  $client;
 
     /**
      * Initialize Order Payment
@@ -22,6 +29,10 @@ class OrderPayment extends FatModel
         parent::__construct();
         $this->orderId = $orderId;
         $this->order = Order::getAttributesById($orderId);
+        $this->account_sid = 'ACdd927f4c0328b7306a8b4c4956b8c595';
+        $this->auth_token = '669575be6c654e5333a6377485003952';
+        $this->twilio_number = "+17164512898";
+        $this->client = new Client($this->account_sid, $this->auth_token);
     }
 
     /**
@@ -188,7 +199,56 @@ class OrderPayment extends FatModel
             $this->error = $payment->getError();
             return false;
         }
+        if ($txnId != 'NA')
+            $this->insertAffiliatePayout($this->orderId);
+
         return true;
+    }
+
+    protected function insertAffiliatePayout($order_id)
+    {
+        $orderObj = new Order($order_id);
+        $order = $orderObj->getOrderToPay();
+        $userDetails = new User();
+        $user = $userDetails->getDetail($order['order_user_id']);
+
+        if (isset($user['refferer_paid']) && $user['refferer_paid'] == 0) {
+            $payout = new TableRecord(AffiliatePayouts::DB_TBL);
+            $payout->assignValues([
+                'amount' => (($order['order_total_amount'] - FatApp::getConfig('PROCESSING_FEES')) * FatApp::getConfig('AFFILIATE_COMMISSION_FEES')) / 100,
+                'rfr_id' => $user['refferer'],
+                'session_id' => $user['user_id'],
+                'description' => 'Payout for refferer student ' . $user['user_email'],
+                'status' => 'Pending',
+            ]);
+            if (!$payout->addNew(['HIGH_PRIORITY'])) {
+                $this->error = $payout->getError();
+                // return false;
+            }
+
+            $refferal = new AffiliateRefferalHistory();
+            $data = $refferal->getDetailByUser($user['user_email']);
+
+            if (isset($data['id'])) {
+                $history = new AffiliateRefferalHistory($data['id']);
+                $history->updateStatus();
+            } else {
+                $refferal =  new TableRecord(AffiliateRefferalHistory::DB_TBL);
+                $refferal->assignValues([
+                    'user_email' => $user['user_email'],
+                    'refral_ids' => $user['refferer'],
+                    "session_id" => session_id(),
+                    "order_id" => $order_id,
+                    "descriptions" => "Refferal purchased the session",
+                    "status" => 'Converted'
+                ]);
+                $refferal->addNew(['HIGH_PRIORITY']);
+            }
+
+            $f_user = new User($order['order_user_id']);
+
+            $f_user->updateReffererPaid();
+        }
     }
 
     /**
@@ -347,11 +407,31 @@ class OrderPayment extends FatModel
         $mail = new FatMailer($subOrder['teacher_lang_id'], 'teacher_lesson_book_email');
         $mail->setVariables($vars);
         $mail->sendMail([$subOrder['teacher_email']]);
+
         $mail = new FatMailer($subOrder['learner_lang_id'], 'learner_lesson_book_email');
         $mail->setVariables($vars);
         $mail->sendMail([$subOrder['learner_email']]);
         $this->addLessonEvent($subOrders, $tlangName);
         $this->checkMeetingLicense($subOrders);
+
+        /** change by vinod **/
+        // $phoneCode = '+91';
+        // $phoneNumber = '8233639160';
+        $phoneCode = (new UserSetting($this->order['order_user_id']))->getPhoneCode();
+        $phoneNumber = (new UserSetting($this->order['order_user_id']))->getPhoneNumber();
+        $message = "Your lesson has been booked, you will receive a reminder by email and SMS (should you have subscribed to this service) 30 minutes before your lesson. you can review, change or cancel the lesson by accessing your dashboard. Go Lessons https://myonlinetutor.co/dashboard/lessons";
+        if (!empty($phoneCode) && !empty($phoneNumber)) {
+            $phone = '+' . $phoneCode . $phoneNumber;
+            $this->sendSMS($phone, $message);
+        }
+
+        $teacherphoneCode = (new UserSetting($teacherId))->getPhoneCode();
+        $teacherphoneNumber = (new UserSetting($teacherId))->getPhoneNumber();
+
+        if (!empty($teacherphoneCode) && !empty($teacherphoneNumber)) {
+            $phone = '+' . $teacherphoneCode . $teacherphoneNumber;
+            $this->sendSMS($phone, $message);
+        }
         return true;
     }
 
@@ -682,5 +762,43 @@ class OrderPayment extends FatModel
             $meetingTool->checkLicense($lesson['ordles_lesson_starttime'], $lesson['ordles_lesson_endtime'], $lesson['ordles_duration']);
         }
         return true;
+    }
+
+    /**
+     * Vinod changed
+     * 
+     * @param array $subOrders
+     * @return bool
+     */
+
+
+    public function getUserSettings(int $userId)
+    {
+        $srch = new SearchBase(static::DB_TBL_USER_SETTINGS);
+        $srch->doNotCalculateRecords();
+        $srch->addCondition('user_id', '=', $userId);
+        $row = FatApp::getDb()->fetch($srch->getResultSet());
+        if (empty($row)) {
+            $this->error = Label::getLabel('LBL_CART_IS_EMPTY');
+            return false;
+        }
+        return $row;
+    }
+
+    public function sendSMS(string $phone, string $message): bool
+    {
+        $client = new Client($this->account_sid, $this->auth_token);
+        try {
+            $client->messages->create(
+                $phone,
+                array(
+                    'from' => $this->twilio_number,
+                    'body' => $message
+                )
+            );
+            return true;
+        } catch (exception $e) {
+            return true;
+        }
     }
 }

@@ -339,6 +339,12 @@ class Lesson extends MyAppModel
         if (!$this->save()) {
             return false;
         }
+		 $quiz = new QuizAttempt(0, $this->userId, $this->userType);
+        if (!$quiz->cancel($this->mainTableRecordId, AppConstant::LESSON)) {
+            $this->error = $quiz->getError();
+            $db->rollbackTransaction();
+            return false;
+        }													  
         if (FatUtility::float($lesson['order_net_amount']) > 0) {
             $refundPercent = $this->getRefundPercentage($lesson['ordles_status'], $lesson['ordles_lesson_starttime']);
             if (!$this->refundToLearner($lesson, $refundPercent)) {
@@ -628,7 +634,7 @@ class Lesson extends MyAppModel
         $srch = $this->getSearchObject();
         $srch->joinTable(User::DB_TBL, 'INNER JOIN', 'teacher.user_id = ordles_teacher_id', 'teacher');
         $srch->joinTable(User::DB_TBL, 'INNER JOIN', 'learner.user_id = order_user_id', 'learner');
-        $srch->addCondition('ordles_status', '=', Lesson::COMPLETED);
+        // $srch->addCondition('ordles_status', '=', Lesson::COMPLETED);
         $srch->addCondition('ordles_reviewed', '=', AppConstant::NO);
         $srch->addMultipleFields([
             'order_user_id',

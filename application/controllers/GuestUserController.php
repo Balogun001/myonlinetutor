@@ -19,12 +19,21 @@ class GuestUserController extends MyAppController
     public function __construct(string $action)
     {
         parent::__construct($action);
+
         $actions = ['verifyEmail', 'configureEmail', 'updateEmail'];
+
         if (!in_array($action, $actions) && $this->siteUserId > 0) {
             if (FatUtility::isAjaxCall()) {
                 FatUtility::dieJsonError(Label::getLabel('LBL_USER_ALREADY_LOGGED_IN'));
             }
-            FatApp::redirectUser(MyUtility::makeUrl('Account', '', [], CONF_WEBROOT_DASHBOARD));
+            $treacherRequest = TeacherRequest::getRequestByUserId($this->siteUserId);
+            print_r($treacherRequest);
+            if (empty($treacherRequest)) {
+                FatApp::redirectUser(MyUtility::makeUrl('dashboard/learner'));
+            } else {
+                FatApp::redirectUser(MyUtility::makeUrl('dashboard/teacher'));
+            }
+            //FatApp::redirectUser(MyUtility::makeUrl('Account', '', [], CONF_WEBROOT_DASHBOARD));
         }
     }
 
@@ -35,11 +44,14 @@ class GuestUserController extends MyAppController
      */
     public function loginForm()
     {
+
         $this->set('frm', UserAuth::getSigninForm());
+
         if (FatApp::getPostedData('isPopUp', FatUtility::VAR_INT, 0)) {
             $this->_template->render(false, false, 'guest-user/login-form-popup.php');
             return;
         }
+
         $this->_template->render();
     }
 
@@ -48,6 +60,7 @@ class GuestUserController extends MyAppController
      */
     public function signinSetup()
     {
+
         $frm = UserAuth::getSigninForm();
         if (!$post = $frm->getFormDataFromArray(FatApp::getPostedData())) {
             FatUtility::dieJsonError(current($frm->getValidationErrors()));
@@ -56,10 +69,11 @@ class GuestUserController extends MyAppController
         if (!$auth->login($post['username'], $post['password'], MyUtility::getUserIp())) {
             FatUtility::dieJsonError($auth->getError());
         }
+
         if (FatUtility::int($post['remember_me']) == AppConstant::YES) {
             UserAuth::setAuthTokenUser(UserAuth::getLoggedUserId());
         }
-        
+
         /* redirect to request form if not approved yet */
         $treacherRequest = TeacherRequest::getRequestByUserId($_SESSION[UserAuth::SESSION_ELEMENT]['user_id']);
         if ($treacherRequest && $treacherRequest['tereq_status'] != TeacherRequest::STATUS_APPROVED) {
@@ -67,9 +81,14 @@ class GuestUserController extends MyAppController
         } else {
             $redirectUrl = MyUtility::makeUrl('Account', '', [], CONF_WEBROOT_DASHBOARD);
         }
+
+        $redirectUrl = MyUtility::makeUrl('Learner', '', [], CONF_WEBROOT_DASHBOARD);
+        //echo $redirectUrl;die;
+
         $_SESSION[AppConstant::SEARCH_SESSION] = FatApp::getPostedData();
+
         FatUtility::dieJsonSuccess([
-            'msg' => Label::getLabel("MSG_LOGIN_SUCCESSFULL"),
+            'msg' => "login Successfully",
             'redirectUrl' => $redirectUrl
         ]);
     }
@@ -128,23 +147,42 @@ class GuestUserController extends MyAppController
         if (!$post = $frm->getFormDataFromArray(FatApp::getPostedData())) {
             FatUtility::dieJsonError(current($frm->getValidationErrors()));
         }
+
         if (!MyUtility::validatePassword($post['user_password'])) {
             FatUtility::dieJsonError(Label::getLabel('MSG_PASSWORD_MUST_BE_EIGHT_ALPHANUMERIC'));
         }
+
         $auth = new UserAuth();
         if (!$auth->signup($post)) {
             FatUtility::dieJsonError($auth->getError());
         }
+        //die('hks');
         $user = User::getByEmail($post['user_email']);
+        if (isset($post['user_last_name'])) {
+            $lastname = $post['user_last_name'];
+        } else {
+            $lastname = '';
+        }
+
+        $data = [
+            'email'     => $post['user_email'],
+            'status'    => 'subscribed',
+            'firstname' => $post['user_first_name'],
+            'lastname'  => $lastname
+        ];
+
+        $this->syncMailchimp($data);
         $response = $auth->sendSignupEmails($user);
+
         if (!empty($response)) {
             FatUtility::dieJsonSuccess(['msg' => $response['msg'], 'redirectUrl' => $response['url']]);
         }
         $redirectUrl = MyUtility::makeUrl();
+
         if (
-                FatApp::getConfig('CONF_ADMIN_APPROVAL_REGISTRATION') == AppConstant::NO &&
-                FatApp::getConfig('CONF_EMAIL_VERIFICATION_REGISTRATION') == AppConstant::NO &&
-                FatApp::getConfig('CONF_AUTO_LOGIN_REGISTRATION') == AppConstant::YES
+            FatApp::getConfig('CONF_ADMIN_APPROVAL_REGISTRATION') == AppConstant::NO &&
+            FatApp::getConfig('CONF_EMAIL_VERIFICATION_REGISTRATION') == AppConstant::NO &&
+            FatApp::getConfig('CONF_AUTO_LOGIN_REGISTRATION') == AppConstant::YES
         ) {
             $auth = new UserAuth();
             if (!$auth->login($post['user_email'], $post['user_password'], MyUtility::getUserIp())) {
@@ -152,12 +190,44 @@ class GuestUserController extends MyAppController
             }
             $redirectUrl = MyUtility::makeUrl('Account', '', [], CONF_WEBROOT_DASHBOARD);
         }
+
         FatUtility::dieJsonSuccess([
             'redirectUrl' => $redirectUrl,
             'msg' => Label::getLabel('LBL_REGISTERATION_SUCCESSFULL')
         ]);
     }
+    private function syncMailchimp($data)
+    {
+        $apiKey = '668eabf48ba2d5cd74e8679973e2d195-us8';
+        $listId = '5f05b54e21';
 
+        $memberId = md5(strtolower($data['email']));
+        $dataCenter = substr($apiKey, strpos($apiKey, '-') + 1);
+        $url = 'https://' . $dataCenter . '.api.mailchimp.com/3.0/lists/' . $listId . '/members/' . $memberId;
+        $json = json_encode([
+            'email_address' => $data['email'],
+            'status'        => $data['status'], // "subscribed","unsubscribed","cleaned","pending"
+            'merge_fields'  => [
+                'FNAME'     => $data['firstname'],
+                'LNAME'     => $data['lastname']
+            ]
+        ]);
+
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_USERPWD, 'user:' . $apiKey);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        //return $httpCode;
+    }
     /**
      * Verify User Email Id
      * 
@@ -165,7 +235,6 @@ class GuestUserController extends MyAppController
      */
     public function verifyEmail(string $code)
     {
-        
         $verification = new Verification();
         $token = $verification->getToken($code);
         if (!$verification->verify($code)) {
@@ -173,6 +242,7 @@ class GuestUserController extends MyAppController
             FatUtility::exitWithErrorCode(404);
         }
         $verification->removeExpiredToken();
+        $firstName = User::getAttributesById($token['usrver_user_id'], 'user_first_name');
         $password = User::getAttributesById($token['usrver_user_id'], 'user_password');
         $auth = new UserAuth();
         if (!$auth->login($token['user_email'], $password, MyUtility::getUserIp(), false)) {
@@ -181,6 +251,11 @@ class GuestUserController extends MyAppController
         }
         Message::addMessage(Label::getLabel("MSG_EMAIL_VERIFIED_SUCCESFULLY"));
         $treacherRequest = TeacherRequest::getRequestByUserId($token['usrver_user_id']);
+
+        if (empty($firstName)) {
+            FatApp::redirectUser(MyUtility::makeUrl('TeacherRequest', 'form', [], CONF_WEBROOT_FRONTEND));
+        }
+
         if ($treacherRequest && $treacherRequest['tereq_status'] != TeacherRequest::STATUS_APPROVED) {
             FatApp::redirectUser(MyUtility::makeUrl('TeacherRequest', 'form', [], CONF_WEBROOT_FRONTEND));
         }
@@ -375,6 +450,32 @@ class GuestUserController extends MyAppController
                 Message::addErrorMessage(Label::getLabel($auth->getError()));
                 FatApp::redirectUser(MyUtility::makeUrl('GuestUser', 'loginForm'));
             }
+
+            if (isset($_SESSION['ref'])) {
+                $refferal = new AffiliateRefferalHistory();
+                $data = $refferal->getDetail($_SESSION['ref'], session_id());
+                if (isset($data['id'])) {
+                    $ref = new AffiliateRefferalHistory($data['id']);
+                    if (!$ref->updateRefferal('Signed up', $user['user_email'], 'User Signed up using refferal')) {
+                        echo FatUtility::dieJsonError($ref->getError());
+                    }
+                } else {
+                    $new_refferal = new AffiliateRefferalHistory();
+                    $new_refferal->assignValues([
+                        'user_email' => $user['user_email'],
+                        'refral_ids' => $_SESSION['ref'],
+                        "session_id" => session_id(),
+                        "descriptions" => "User Signed up using refferal",
+                        "status" => 'Signed up'
+                    ]);
+                    $new_refferal->save();
+                }
+                $s_user = new User($userInfo['id']);
+                if (isset($s_user['refferer']) && $s_user['refferer'] == '') {
+                    $s_user->updateRefferer($_SESSION['ref']);
+                }
+            }
+
             Message::addMessage(Label::getLabel("LBL_LOG_IN_SUCCESSFULL"));
             FatApp::redirectUser(MyUtility::makeUrl('Account', '', [], CONF_WEBROOT_DASHBOARD));
         }
@@ -425,6 +526,33 @@ class GuestUserController extends MyAppController
                     Message::addErrorMessage(Label::getLabel($auth->getError()));
                     FatApp::redirectUser(MyUtility::makeUrl('GuestUser', 'loginForm'));
                 }
+
+
+                if (isset($_SESSION['ref'])) {
+                    $refferal = new AffiliateRefferalHistory();
+                    $data = $refferal->getDetail($_SESSION['ref'], session_id());
+                    if (isset($data['id'])) {
+                        $ref = new AffiliateRefferalHistory($data['id']);
+                        if (!$ref->updateRefferal('Signed up', $user['user_email'], 'User Signed up using refferal')) {
+                            echo FatUtility::dieJsonError($ref->getError());
+                        }
+                    } else {
+                        $new_refferal = new AffiliateRefferalHistory();
+                        $new_refferal->assignValues([
+                            'user_email' => $user['user_email'],
+                            'refral_ids' => $_SESSION['ref'],
+                            "session_id" => session_id(),
+                            "descriptions" => "User Signed up using refferal",
+                            "status" => 'Signed up'
+                        ]);
+                        $new_refferal->save();
+                    }
+                    $s_user = new User($userInfo['id']);
+                    if (isset($s_user['refferer']) && $s_user['refferer'] == '') {
+                        $s_user->updateRefferer($_SESSION['ref']);
+                    }
+                }
+
                 Message::addMessage(Label::getLabel($successMsgLabel));
                 FatApp::redirectUser($redirectUrl);
             }
@@ -551,5 +679,4 @@ class GuestUserController extends MyAppController
         }
         return true;
     }
-
 }

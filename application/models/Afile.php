@@ -35,10 +35,10 @@ class Afile extends FatModel
     const TYPE_LESSON_PLAN_IMAGE = 34;
     const TYPE_BLOG_CONTRIBUTION = 36;
     const TYPE_BANNER_SECOND_IMAGE = 38;
-    const TYPE_SPOKEN_LANGUAGES = 39;
+	const TYPE_SPOKEN_LANGUAGES = 39;
     const TYPE_FLAG_SPOKEN_LANGUAGES = 40;
     const TYPE_TEACHING_LANGUAGES = 41;
-    const TYPE_FLAG_TEACHING_LANGUAGES = 42;
+    const TYPE_FLAG_TEACHING_LANGUAGES = 42;	
     const TYPE_BLOG_PAGE_IMAGE = 43;
     const TYPE_LESSON_PAGE_IMAGE = 44;
     const TYPE_PWA_APP_ICON = 46;
@@ -51,6 +51,16 @@ class Afile extends FatModel
     const TYPE_MESSAGE_ATTACHMENT = 53;
     const TYPE_ORDER_PAY_RECEIPT = 54;
     const TYPE_GROUP_CLASS_BANNER = 55;
+    const TYPE_CERTIFICATE_BACKGROUND_IMAGE = 56;
+    const TYPE_COURSE_IMAGE = 57;
+    const TYPE_COURSE_PREVIEW_VIDEO = 58;
+    const TYPE_CERTIFICATE_IMAGE = 59;
+    const TYPE_CERTIFICATE_PDF = 60;
+    const TYPE_CERTIFICATE_LOGO = 61;
+    const TYPE_COURSE_REQUEST_IMAGE = 62;
+    const TYPE_COURSE_REQUEST_PREVIEW_VIDEO = 63;
+    const TYPE_QUIZ_ANSWER_TYPE_AUDIO = 64;
+    const TYPE_QUESTION_AUDIO = 65;
 
     /* Image Sizes */
     const SIZE_SMALL = 'SMALL';
@@ -88,6 +98,22 @@ class Afile extends FatModel
         $srch->addCondition('file_id', '=', $fileId);
         $srch->doNotCalculateRecords();
         return FatApp::getDb()->fetch($srch->getResultSet());
+    }
+
+    /**
+     * Get By Type
+     *
+     * @param int $recordId         It is primary key of entity for which file getting|uploading
+     * @return null|array           It will return a row from table Afile::DB_TBL, in case of failure it returns null
+     */
+    public function getFilesByType(int $recordId = 0)
+    {
+        $srch = new SearchBase(static::DB_TBL);
+        $srch->addCondition('file_type', '=', $this->type);
+        $srch->addCondition('file_record_id', '=', $recordId);
+        $srch->addOrder('file_order', 'ASC');
+        $srch->doNotCalculateRecords();
+        return FatApp::getDb()->fetchAll($srch->getResultSet());
     }
 
     /**
@@ -144,18 +170,23 @@ class Afile extends FatModel
      */
     public function saveFile(array $file, int $recordId, bool $unique = false): bool
     {
+		
         if (!$this->validateUploadedFile($file)) {
             return false;
         }
+		
         $uploadPath = CONF_UPLOADS_PATH;
+		
         $filePath = date('Y') . '/' . date('m') . '/';
         if (!file_exists($uploadPath . $filePath)) {
             mkdir($uploadPath . $filePath, 0777, true);
         }
+		
         $fileName = preg_replace('/[^a-zA-Z0-9.]/', '', $file['name']);
         while (file_exists($uploadPath . $filePath . $fileName)) {
             $fileName = time() . '-' . $fileName;
         }
+		
         $filePath = $filePath . $fileName;
         if (!move_uploaded_file($file['tmp_name'], $uploadPath . $filePath)) {
             $this->error = Label::getLabel('FILE_COULD_NOT_SAVE_FILE');
@@ -182,7 +213,7 @@ class Afile extends FatModel
         }
         $this->fileData['file_id'] = $record->getId();
         if ($unique) {
-            
+
             $stmt = [
                 'vals' => [$this->type, $this->langId, $recordId, $this->fileData['file_id']],
                 'smt' => 'file_type = ? AND file_lang_id = ? AND file_record_id = ? AND file_id != ?'
@@ -190,12 +221,13 @@ class Afile extends FatModel
             $db->deleteRecords(static::DB_TBL, $stmt);
         }
         if (
-                MyUtility::isDemoUrl() == false &&
-                $unique && !empty($oldFile['file_path']) &&
-                file_exists(CONF_UPLOADS_PATH . $oldFile['file_path'])
+            MyUtility::isDemoUrl() == false &&
+            $unique && !empty($oldFile['file_path']) &&
+            file_exists(CONF_UPLOADS_PATH . $oldFile['file_path'])
         ) {
             unlink(CONF_UPLOADS_PATH . $oldFile['file_path']);
         }
+		
         $fileId = (!empty($oldFile['file_id'])) ? $oldFile['file_id'] : 0;
         $this->clearCache($recordId, $fileId);
         return true;
@@ -301,7 +333,7 @@ class Afile extends FatModel
         $sizes = $this->getImageSizes($size);
         if (empty($file) || !file_exists(CONF_UPLOADS_PATH . $file['file_path'])) {
             $img = new ImageResize(CONF_INSTALLATION_PATH . 'public/images/noimage.jpg');
-            $img->setResizeMethod(ImageResize::IMG_RESIZE_EXTRA_ADDSPACE);
+            $img->setResizeMethod(ImageResize::IMG_RESIZE_RESET_DIMENSIONS);
             $img->setMaxDimensions($sizes[0], $sizes[1]);
             $img->displayImage();
             exit;
@@ -318,7 +350,7 @@ class Afile extends FatModel
         header("Pragma: public");
 
         $img = new ImageResize($filePath);
-        $img->setResizeMethod(ImageResize::IMG_RESIZE_EXTRA_ADDSPACE);
+        $img->setResizeMethod(ImageResize::IMG_RESIZE_RESET_DIMENSIONS);
         $img->setMaxDimensions($sizes[0], $sizes[1]);
         if (CONF_USE_FAT_CACHE) {
             ob_start();
@@ -344,7 +376,7 @@ class Afile extends FatModel
         ini_set('memory_limit', -1);
         if (empty($file) || !file_exists(CONF_UPLOADS_PATH . $file['file_path'])) {
             $img = new ImageResize(CONF_INSTALLATION_PATH . 'public/images/noimage.jpg');
-            $img->setResizeMethod(ImageResize::IMG_RESIZE_EXTRA_ADDSPACE);
+            $img->setResizeMethod(ImageResize::IMG_RESIZE_RESET_DIMENSIONS);
             $img->displayImage(100);
             exit;
         }
@@ -520,12 +552,12 @@ class Afile extends FatModel
             trigger_error('S3 Settings not found.', E_USER_ERROR);
         }
         $client = S3Client::factory([
-                    'version' => 'latest',
-                    'region' => AWS_S3_REGION,
-                    'credentials' => [
-                        'key' => AWS_S3_KEY,
-                        'secret' => AWS_S3_SECRET
-                    ]
+            'version' => 'latest',
+            'region' => AWS_S3_REGION,
+            'credentials' => [
+                'key' => AWS_S3_KEY,
+                'secret' => AWS_S3_SECRET
+            ]
         ]);
         $client->registerStreamWrapper();
     }
@@ -561,6 +593,13 @@ class Afile extends FatModel
                 return 'image/vnd.microsoft.icon';
             case 'zip':
                 return 'application/zip';
+            case 'mp4':
+                return 'video/mp4';
+            case 'webm':
+            case 'wav':
+                return 'video/webm';
+            case 'ogg':
+                return 'audio/ogg';
             default:
                 return '';
         }
@@ -585,6 +624,7 @@ class Afile extends FatModel
             case static::TYPE_BLOG_PAGE_IMAGE:
             case static::TYPE_TESTIMONIAL_IMAGE:
             case static::TYPE_APPLY_TO_TEACH_BANNER:
+            case static::TYPE_CERTIFICATE_LOGO:
                 return ['png', 'jpg', 'jpeg'];
             case static::TYPE_PAYIN:
             case static::TYPE_BANNER:
@@ -597,10 +637,10 @@ class Afile extends FatModel
             case static::TYPE_LESSON_PACKAGE_IMAGE:
             case static::TYPE_LESSON_PLAN_IMAGE:
             case static::TYPE_BANNER_SECOND_IMAGE:
-            case static::TYPE_SPOKEN_LANGUAGES:
-            case static::TYPE_FLAG_SPOKEN_LANGUAGES:
+											   
+													
             case static::TYPE_TEACHING_LANGUAGES:
-            case static::TYPE_FLAG_TEACHING_LANGUAGES:
+													  
             case static::TYPE_OPENGRAPH_IMAGE:
                 return ['png', 'jpg', 'jpeg', 'gif', 'svg'];
             case static::TYPE_BLOG_CONTRIBUTION:
@@ -616,11 +656,19 @@ class Afile extends FatModel
             case static::TYPE_HOME_BANNER_DESKTOP:
             case static::TYPE_HOME_BANNER_MOBILE:
             case static::TYPE_HOME_BANNER_IPAD:
+            case static::TYPE_CERTIFICATE_BACKGROUND_IMAGE:
                 return ['png', 'jpg', 'jpeg'];
             case static::TYPE_FAVICON:
                 return ['ico', 'png'];
             case static::TYPE_MESSAGE_ATTACHMENT:
                 return ['png', 'jpeg', 'jpg', 'gif', 'pdf', 'doc', 'docx', 'zip', 'txt'];
+            case static::TYPE_COURSE_IMAGE:
+                return ['png', 'jpeg', 'jpg', 'gif'];
+            case static::TYPE_COURSE_PREVIEW_VIDEO:
+                return ['mp4'];
+            case static::TYPE_QUIZ_ANSWER_TYPE_AUDIO:
+            case static::TYPE_QUESTION_AUDIO:
+                return ['ogg', 'wav'];
             default:
                 return [];
         }
@@ -656,9 +704,9 @@ class Afile extends FatModel
                 static::SIZE_LARGE => [600, 600]
             ],
             static::TYPE_FRONT_LOGO => [
-                static::SIZE_SMALL => [300, 114],
-                static::SIZE_MEDIUM => [300, 114],
-                static::SIZE_LARGE => [300, 114]
+                static::SIZE_SMALL => [100, 50],
+                static::SIZE_MEDIUM => [140, 70],
+                static::SIZE_LARGE => [200, 100]
             ],
             static::TYPE_APPLY_TO_TEACH_BANNER => [
                 static::SIZE_SMALL => [100, 100],
@@ -689,6 +737,11 @@ class Afile extends FatModel
                 static::SIZE_SMALL => [300, 114],
                 static::SIZE_MEDIUM => [300, 114],
                 static::SIZE_LARGE => [300, 114]
+            ],
+            static::TYPE_CERTIFICATE_LOGO => [
+                static::SIZE_SMALL => [100, 33],
+                static::SIZE_MEDIUM => [140, 47],
+                static::SIZE_LARGE => [168, 56]
             ],
             static::TYPE_EMAIL_LOGO => [
                 static::SIZE_SMALL => [200, 76],
@@ -765,25 +818,25 @@ class Afile extends FatModel
                 static::SIZE_MEDIUM => [300, 300],
                 static::SIZE_LARGE => [600, 600]
             ],
-            static::TYPE_SPOKEN_LANGUAGES => [
-                static::SIZE_SMALL => [100, 100],
-                static::SIZE_MEDIUM => [300, 300],
-                static::SIZE_LARGE => [600, 600]
-            ],
-            static::TYPE_FLAG_SPOKEN_LANGUAGES => [
-                static::SIZE_SMALL => [100, 100],
-                static::SIZE_MEDIUM => [300, 300],
-                static::SIZE_LARGE => [600, 600]
-            ],
+											  
+												 
+												  
+												
+			  
+												   
+												 
+												  
+												
+			  
             static::TYPE_TEACHING_LANGUAGES => [
-                static::SIZE_SMALL => [100, 63],
-                static::SIZE_MEDIUM => [250, 163],
-                static::SIZE_LARGE => [350, 263]
-            ],
-            static::TYPE_FLAG_TEACHING_LANGUAGES => [
+												
+												  
+												
+			  
+													 
                 static::SIZE_SMALL => [60, 60],
-                static::SIZE_MEDIUM => [60, 60],
-                static::SIZE_LARGE => [150, 150]
+                static::SIZE_MEDIUM => [120, 120],
+                static::SIZE_LARGE => [240, 240]
             ],
             static::TYPE_BLOG_PAGE_IMAGE => [
                 static::SIZE_SMALL => [100, 100],
@@ -815,16 +868,44 @@ class Afile extends FatModel
                 static::SIZE_MEDIUM => [300, 300],
                 static::SIZE_LARGE => [600, 600]
             ],
+            static::TYPE_CERTIFICATE_BACKGROUND_IMAGE => [
+                static::SIZE_SMALL => [100, 100],
+                static::SIZE_MEDIUM => [300, 300],
+                static::SIZE_LARGE => [2070, 1680]
+            ],
+            static::TYPE_CERTIFICATE_IMAGE => [
+                static::SIZE_SMALL => [100, 100],
+                static::SIZE_MEDIUM => [300, 300],
+                static::SIZE_LARGE => [2070, 1680]
+            ],
             static::TYPE_ORDER_PAY_RECEIPT => [
                 static::SIZE_SMALL => [100, 100],
                 static::SIZE_MEDIUM => [300, 300],
                 static::SIZE_LARGE => [600, 600]
             ],
+            static::TYPE_COURSE_IMAGE => [
+                static::SIZE_SMALL => [300, 169],
+                static::SIZE_MEDIUM => [500, 281],
+                static::SIZE_LARGE => [1000, 563]
+            ],
+            static::TYPE_COURSE_PREVIEW_VIDEO => [],
             static::TYPE_GROUP_CLASS_BANNER => [
                 static::SIZE_SMALL => [300, 169],
                 static::SIZE_MEDIUM => [500, 281],
                 static::SIZE_LARGE => [1000, 563]
-            ]
+            ],
+            static::TYPE_CERTIFICATE_BACKGROUND_IMAGE => [
+                static::SIZE_SMALL => [100, 100],
+                static::SIZE_MEDIUM => [300, 300],
+                static::SIZE_LARGE => [2070, 1680]
+            ],
+            static::TYPE_CERTIFICATE_IMAGE => [
+                static::SIZE_SMALL => [100, 100],
+                static::SIZE_MEDIUM => [300, 300],
+                static::SIZE_LARGE => [2070, 1680]
+            ],
+            static::TYPE_QUIZ_ANSWER_TYPE_AUDIO => [],
+            static::TYPE_QUESTION_AUDIO => [],
         ];
         if ($size === null) {
             return $arr[$this->type];
@@ -844,7 +925,7 @@ class Afile extends FatModel
             static::TYPE_HOME_BANNER_DESKTOP => Label::getLabel('IMGA_Home_Page_Banner'),
             static::TYPE_CPAGE_BACKGROUND_IMAGE => Label::getLabel('IMGA_CPAGE_BACKGROUND_IMAGE'),
             static::TYPE_TEACHING_LANGUAGES => Label::getLabel('IMGA_TEACHING_LANGUAGES'),
-            static::TYPE_FLAG_TEACHING_LANGUAGES => Label::getLabel('IMGA_TEACHING_LANGUAGES_FLAG'),
+																									
             static::TYPE_BLOG_POST_IMAGE => Label::getLabel('IMGA_BLOG_POST_IMAGE'),
         ];
     }
@@ -907,7 +988,7 @@ class Afile extends FatModel
      * @param int $type
      * @return int
      */
-    public static function getAllowedUploadSize(int $type): int
+    public static function getAllowedUploadSize(int $type = null): int
     {
         $maxUploadSizeAllowed = CommonHelper::getMaximumFileUploadSize(true);
         switch ($type) {
@@ -929,10 +1010,10 @@ class Afile extends FatModel
             case static::TYPE_LESSON_PLAN_IMAGE:
             case static::TYPE_BLOG_CONTRIBUTION:
             case static::TYPE_BANNER_SECOND_IMAGE:
-            case static::TYPE_SPOKEN_LANGUAGES:
-            case static::TYPE_FLAG_SPOKEN_LANGUAGES:
+											   
+													
             case static::TYPE_TEACHING_LANGUAGES:
-            case static::TYPE_FLAG_TEACHING_LANGUAGES:
+													  
             case static::TYPE_BLOG_PAGE_IMAGE:
             case static::TYPE_LESSON_PAGE_IMAGE:
             case static::TYPE_OPENGRAPH_IMAGE:
@@ -947,11 +1028,75 @@ class Afile extends FatModel
             case static::TYPE_HOME_BANNER_IPAD:
             case static::TYPE_FAVICON:
             case static::TYPE_MESSAGE_ATTACHMENT:
+            case static::TYPE_CERTIFICATE_BACKGROUND_IMAGE:
             case static::TYPE_ORDER_PAY_RECEIPT:
+            case static::TYPE_COURSE_IMAGE:
+            case static::TYPE_COURSE_PREVIEW_VIDEO:
             case static::TYPE_GROUP_CLASS_BANNER:
+            case static::TYPE_CERTIFICATE_LOGO:
+            default:
                 /* 4194304 -- 4 mb  */
                 return min($maxUploadSizeAllowed, 4194304);
         }
     }
 
+    /**
+     * Show Video
+     *
+     * @param integer $recordId
+     * @param integer $subRecordId
+     * @return video
+     */
+    public function showVideo(int $recordId, int $subRecordId = 0)
+    {
+        ob_end_clean();
+        $file = $this->getFile($recordId, $subRecordId);
+        $filePath = CONF_UPLOADS_PATH . $file['file_path'];
+        $fileExt = strtolower(pathinfo($file['file_name'], PATHINFO_EXTENSION));
+        header("Content-Type: " . static::getContentType($fileExt));
+        $headers = FatApp::getApacheRequestHeaders();
+        if (strtotime($headers['If-Modified-Since'] ?? '') == filemtime($filePath)) {
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT', true, 304);
+            exit;
+        }
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT', true, 200);
+        header("Expires: " . date('r', strtotime("+30 Day")));
+        header('Cache-Control: public');
+        header("Pragma: public");
+        $fileData = file_get_contents($filePath);
+        if (CONF_USE_FAT_CACHE) {
+            FatCache::set($_SERVER['REQUEST_URI'], $fileData, '.' . $fileExt);
+        }
+        echo $fileData;
+    }
+
+    /**
+     * Show Video
+     *
+     * @param integer $recordId
+     * @param integer $subRecordId
+     * @return video
+     */
+    public function showPdf(int $recordId)
+    {
+        ob_end_clean();
+        $file = $this->getFile($recordId);
+        $filePath = CONF_UPLOADS_PATH . $file['file_path'];
+        $fileExt = strtolower(pathinfo($file['file_name'], PATHINFO_EXTENSION));
+        header("Content-Type: " . static::getContentType($fileExt));
+        $headers = FatApp::getApacheRequestHeaders();
+        if (strtotime($headers['If-Modified-Since'] ?? '') == filemtime($filePath)) {
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT', true, 304);
+            exit;
+        }
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT', true, 200);
+        header("Expires: " . date('r', strtotime("+30 Day")));
+        header('Cache-Control: public');
+        header("Pragma: public");
+        $fileData = file_get_contents($filePath);
+        if (CONF_USE_FAT_CACHE) {
+            FatCache::set($_SERVER['REQUEST_URI'], $fileData, '.' . $fileExt);
+        }
+        echo $fileData;
+    }
 }

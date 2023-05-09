@@ -125,9 +125,9 @@ class RatingReview extends MyAppModel
         $fld = $frm->addSelectBox(Label::getLabel('LBL_RATING'), 'ratrev_overall', [1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5], '', ['class' => 'star-rating']);
         $fld->requirements()->setRequired(true);
         $fld->setWrapperAttribute('class', 'rating-f');
-        $frm->addRequiredField(Label::getLabel('LBL_TITLE'), 'ratrev_title');
+        $frm->addRequiredField(Label::getLabel('LBL_TOPIC'), 'ratrev_title');//LBL_TITLE
         $frm->addHiddenField('', 'ratrev_type_id');
-        $frm->addTextArea(Label::getLabel('LBL_DESCRIPTION'), 'ratrev_detail')->requirements()->setRequired();
+        $frm->addTextArea(Label::getLabel('LBL_Feedback'), 'ratrev_detail')->requirements()->setRequired();//LBL_DESCRIPTION
         $frm->addSubmitButton('', 'submit', Label::getLabel('LBL_SUBMIT'));
         return $frm;
     }

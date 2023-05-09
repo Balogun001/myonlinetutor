@@ -1,5 +1,76 @@
 <?php defined('SYSTEM_INIT') or die('Invalid Usage.'); ?>
 <!-- [ GROUP CLASS CELL ========= -->
+
+<style>
+    .card-class{
+        border: 1px solid #DDDDDD;
+        border-radius: 20px;
+        box-shadow: none;
+    }
+    .card-class:hover{
+        box-shadow: none;
+    }
+    .card-class__media{
+        border-radius: 20px 20px 0;
+    }
+    .card-element__item span {
+        background: #F7F7F7;
+        border-radius: 4px;
+        display: inline-block;
+        padding: 4px 8px;
+        font-weight: 400;
+        font-size: 20px;
+        line-height: 30px;
+        color: #000;
+    }
+    .card-element__item:not(:last-child):after{
+        display: none;
+    }
+    .card-class .avtar {
+        background: transparent;
+    }
+    .card-class .avtar img {
+        border-radius: 50%;
+    }
+    .card-element{
+        margin-bottom:20px;
+    }
+    .card-class__footer{
+        border:none;
+        padding: 0 24px 24px 24px;     
+    }
+    .card-class__subtitle {
+        color: #2765F1;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 28px;
+    }
+    .card-class__title {
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 42px;
+    }
+    .card-price{
+        color: #000000;
+    }
+    .ratings .value{
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: #000000;
+        opacity: 1;
+    }
+    @media(min-width: 1199px){
+        .card-class__footer a.btn {
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 26px;
+        }
+    }
+
+</style>
 <div class="<?php echo $cardClass; ?>">
 
     <div class="card-class">
@@ -93,12 +164,30 @@
                 </div>
             </div>
 
-            <h4 class="card-price color-primary margin-top-5 bold-700"><?php echo MyUtility::formatMoney($class['grpcls_entry_fee']); ?></h4>
+            <a href="<?php echo MyUtility::makeUrl('Teachers', 'view', [$class['user_username']]) ?>" class="profile-meta d-flex align-items-center">
+                        <div class="profile-meta__media margin-right-4">
+                            <span class="avtar" data-title="M"><img src="<?php echo FatCache::getCachedUrl(MyUtility::makeUrl('Image', 'show', [Afile::TYPE_USER_PROFILE_IMAGE, $class['grpcls_teacher_id'], Afile::SIZE_SMALL]), CONF_DEF_CACHE_TIME, '.' . current(array_reverse(explode(".", $class['user_photo'])))); ?>" alt="<?php echo $class['user_full_name'] ?>" /></span>
+                        </div>
+                        <div class="profile-meta__details">
+                            <p class="bold-600 color-black margin-bottom-1 style-ellipsis"><?php echo $class['user_full_name'] ?></p>
+                            <div class="ratings">
+                               
+                                <span class="value"><?php echo $class['testat_ratings']; ?></span>
+                                <svg class="icon icon--rating">
+                                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#rating'; ?>"></use>
+                                </svg>&nbsp;
+                                <span class="count">(<?php echo $class['testat_reviewes']; ?>)</span>
+                            </div>
+                        </div>
+                    </a>
+
+
+            
 
         </div>
         <div class="card-class__footer">
             <div class="row justify-content-between align-items-center">
-                <div class="col-sm-7">
+                <!--  <div class="col-sm-7">
                     <a href="<?php echo MyUtility::makeUrl('Teachers', 'view', [$class['user_username']]) ?>" class="profile-meta d-flex align-items-center">
                         <div class="profile-meta__media margin-right-4">
                             <span class="avtar" data-title="M"><img src="<?php echo FatCache::getCachedUrl(MyUtility::makeUrl('Image', 'show', [Afile::TYPE_USER_PROFILE_IMAGE, $class['grpcls_teacher_id'], Afile::SIZE_SMALL]), CONF_DEF_CACHE_TIME, '.' . current(array_reverse(explode(".", $class['user_photo'])))); ?>" alt="<?php echo $class['user_full_name'] ?>" /></span>
@@ -113,26 +202,32 @@
                                 <span class="count">(<?php echo $class['testat_reviewes']; ?>)</span>
                             </div>
                         </div>
-                    </a>
-                </div>
-                <div class="col-sm-5">
-                    <div class="btn-group d-flex d-sm-block">
-                        <a href="<?php echo MyUtility::makeUrl('GroupClasses', 'view', [$class['grpcls_slug']]); ?>" class="btn btn--primary-bordered btn--block d-block d-sm-none margin-right-1"><?php echo Label::getLabel('LBL_VIEW_DETAILS') ?></a>
-                        <?php if ($class['grpcls_already_booked']) { ?>
-                            <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_ALREADY_BOOKED') ?>" tabindex="0" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } elseif ($class['grpcls_booked_seats'] >= $class['grpcls_total_seats']) { ?>
-                            <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CLASS_FULL'); ?>" tabindex="0" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } elseif ($class['grpcls_start_datetime'] < date('Y-m-d H:i:s', strtotime('+' . $bookingBefore . ' minutes', $class['grpcls_currenttime_unix']))) { ?>
-                            <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_BOOKING_CLOSED') ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } elseif ($siteUserId == $class['grpcls_teacher_id']) { ?>
-                            <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CANNOT_BOOK_OWN_CLASS'); ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } elseif ($class['grpcls_booked_seats'] + $class['grpcls_unpaid_seats'] >= $class['grpcls_total_seats']) { ?>
-                            <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CLASS_HOLD_INFO'); ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } elseif ($class['grpcls_type'] == GroupClass::TYPE_PACKAGE) { ?>
-                            <a href="javascript:void(0);" onclick="cart.addPackage(<?php echo $class['grpcls_id']; ?>)" class="btn btn--primary btn--block margin-left-1"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } else { ?>
-                            <a href="javascript:void(0);" onclick="cart.addClass(<?php echo $class['grpcls_id']; ?>)" class="btn btn--primary btn--block margin-left-1"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
-                        <?php } ?>
+                    </a> 
+                </div>-->
+                <div class="col-sm-12">
+                    <div class="d-flex flex-wrap justify-content-between">
+                        <div class="btn-group d-flex d-sm-block">
+                            <a href="<?php echo MyUtility::makeUrl('GroupClasses', 'view', [$class['grpcls_slug']]); ?>" class="btn btn--primary-bordered btn--block d-block d-sm-none margin-right-1"><?php echo Label::getLabel('LBL_VIEW_DETAILS') ?></a>
+                            <?php if ($class['grpcls_already_booked']) { ?>
+                                <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_ALREADY_BOOKED') ?>" tabindex="0" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } elseif ($class['grpcls_booked_seats'] >= $class['grpcls_total_seats']) { ?>
+                                <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CLASS_FULL'); ?>" tabindex="0" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } elseif ($class['grpcls_start_datetime'] < date('Y-m-d H:i:s', strtotime('+' . $bookingBefore . ' minutes', $class['grpcls_currenttime_unix']))) { ?>
+                                <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_BOOKING_CLOSED') ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } elseif ($siteUserId == $class['grpcls_teacher_id']) { ?>
+                                <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CANNOT_BOOK_OWN_CLASS'); ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } elseif ($class['grpcls_booked_seats'] + $class['grpcls_unpaid_seats'] >= $class['grpcls_total_seats']) { ?>
+                                <a href="javascript:void(0);" title="<?php echo Label::getLabel('LBL_CLASS_HOLD_INFO'); ?>" class="btn btn--primary btn--block margin-left-1 btn--disabled"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } elseif ($class['grpcls_type'] == GroupClass::TYPE_PACKAGE) { ?>
+                                <a href="javascript:void(0);" onclick="cart.addPackage(<?php echo $class['grpcls_id']; ?>)" class="btn btn--primary btn--block margin-left-1"><?php echo Label::getLabel("LBL_BOOK_NOW") ?></a>
+                            <?php } else { ?>
+                                <a href="javascript:void(0);" onclick="cart.addClass(<?php echo $class['grpcls_id']; ?>)" class="btn btn--secondary btn--block margin-left-1 book"><?php // echo Label::getLabel("LBL_BOOK_NOW") ?> Book Tutor</a>
+                            <?php } ?>
+                        </div>
+
+                        <div>
+                            <h4 class="card-price  margin-top-5 bold-700"><?php echo MyUtility::formatMoney($class['grpcls_entry_fee']).'/Class'; ?></h4>
+                        </div>
                     </div>
                 </div>
             </div>

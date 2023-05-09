@@ -16,6 +16,7 @@ class User extends MyAppModel
     const DB_TBL_STAT_PREFIX = 'tstat_';
     const DB_TBL_SETTING = 'tbl_user_settings';
     const DB_TBL_USR_BANK_INFO = 'tbl_user_bank_details';
+    const DB_TBL_USR_STRIPE_CONNECT_INFO = 'tbl_user_stripe_connect_details';
     const DB_TBL_USR_BANK_INFO_PREFIX = 'ub_';
     const DB_TBL_USR_WITHDRAWAL_REQ = 'tbl_user_withdrawal_requests';
     const DB_TBL_USR_WITHDRAWAL_REQ_PREFIX = 'withdrawal_';
@@ -63,6 +64,13 @@ class User extends MyAppModel
         $srch->joinTable(static::DB_TBL_SETTING, 'INNER JOIN', 'uset.user_id = user.user_id', 'uset');
         $srch->addDirectCondition('user.user_deleted IS NULL');
         $srch->addCondition('user.user_id', '=', $userId);
+        $srch->doNotCalculateRecords();
+        $srch->setPageSize(1);
+        return FatApp::getDb()->fetch($srch->getResultSet());
+    }
+    public static function getStripeDetail(int $userId){
+        $srch = new SearchBase('tbl_user_stripe_connect_details');
+        $srch->addCondition('tbl_user_stripe_connect_details.user_id', '=', $userId);
         $srch->doNotCalculateRecords();
         $srch->setPageSize(1);
         return FatApp::getDb()->fetch($srch->getResultSet());
@@ -129,6 +137,11 @@ class User extends MyAppModel
         if ($this->getMainTableRecordId() == 0) {
             $this->setFldValue('user_created', date('Y-m-d H:i:s'));
         }
+
+        // Code Goes to MyAppModel Save Method (RGCUSTOM)
+        //return true;
+        $db = FatApp::getDb();
+
         return parent::save();
     }
 
@@ -303,6 +316,97 @@ class User extends MyAppModel
             return false;
         }
         return true;
+    }
+    public function updateStripeConnectInfo(array $data = [])
+    {
+       
+        if (($this->getMainTableRecordId() < 1)) {
+            $this->error = Label::getLabel('ERR_INVALID_REQUEST_USER_NOT_INITIALIZED');
+            return false;
+        }
+       
+        
+        $stripe =  new \Stripe\StripeClient('sk_test_51KlBYRBHOKvtnZNpHREAc3JTMGf8tMDaRutHzeMXKV8lFoocoQgropFRKVZIQZmMT9qHWdCEmWW0RIytwFOBa0XE00Xx5dsY8H');
+         \Stripe\Stripe::setApiKey('sk_test_51KlBYRBHOKvtnZNpHREAc3JTMGf8tMDaRutHzeMXKV8lFoocoQgropFRKVZIQZmMT9qHWdCEmWW0RIytwFOBa0XE00Xx5dsY8H');
+
+         try {
+            $account = \Stripe\Account::create([
+                'country' =>  trim($data['user_country_code']),
+                'type' => 'custom',
+                'email' => trim($data['user_email']),
+                'tos_acceptance' => [
+                    'date' => time(),
+                    'ip' => $_SERVER['REMOTE_ADDR'], // Assumes you're not using a proxy
+                ],
+                'external_account' => [
+                    'object' => 'bank_account',
+                    'country' =>  trim($data['user_country_code']),
+                    'currency' => trim($data['user_currency']),
+                    'account_holder_name' => trim($data['user_first_name']) . ' ' . trim($data['user_last_name']),
+                    'account_holder_type' => 'individual',
+                    'routing_number' => isset($data['routing_number']) ? trim($data['routing_number']) : NULL,//110000000
+                    'account_number' => trim($data['account_number']),
+                ],
+                'business_type' => 'individual',
+                'capabilities' => [
+                    'card_payments' => ['requested' => true],
+                    'transfers' => ['requested' => true],
+                ],
+                ['business_profile' => [
+                    'mcc' => '5734',
+                    'url' => 'https://myonlinetutor.co/'
+                ]]
+            ]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            $msg['msg'] = $e->getMessage();
+            $msg['status'] = 0;
+            return $msg;
+        }
+            $accountLinks =  $stripe->accountLinks->create(
+                [
+                    'account' => $account->id,
+                    'refresh_url' => "https://myonlinetutor.co/dashboard/account/profile-info?msg=success",
+                    'return_url' => "https://myonlinetutor.co/dashboard/account/profile-info",
+                    'type' => 'account_onboarding',
+                    'collect' => 'eventually_due',
+                ]
+            );
+            $assignValues = [
+                'user_id' => $this->getMainTableRecordId(),
+                'user_country_code' => $data['user_country_code'],
+                'user_currency' => $data['user_currency'],
+                'user_first_name' => $data['user_first_name'],
+                'user_last_name' => $data['user_last_name'],
+                'user_email' => $data['user_email'],
+                'account_number' => $data['account_number'],
+                'routing_number' => isset($data['routing_number']) ? trim($data['routing_number']) : NULL,
+                'stripe_connect_id' => $account->id,
+            ];
+            if (!FatApp::getDb()->insertFromArray(static::DB_TBL_USR_STRIPE_CONNECT_INFO, $assignValues, false, [], $assignValues)) {
+                $this->error = $this->db->getError();
+                return false;
+            }
+        return $accountLinks->url;
+    }
+    public function StripeConnectWithdrawal(array $data = []){
+        $stripe =  new \Stripe\StripeClient('sk_test_51KlBYRBHOKvtnZNpHREAc3JTMGf8tMDaRutHzeMXKV8lFoocoQgropFRKVZIQZmMT9qHWdCEmWW0RIytwFOBa0XE00Xx5dsY8H');
+        try {
+            $stripe->accounts->update(
+                $data['stripe_connect_id'],
+                ['tos_acceptance' => ['date' => time(), 'ip' => $_SERVER['REMOTE_ADDR']]]
+              );
+            $transfer = $stripe->transfers->create([
+                'amount' => $data['withdrawal_amount'] * 100,
+                'currency' => 'usd',
+                'destination' => $data['stripe_connect_id'],
+                'transfer_group' => 'ORDER_95',
+            ]);
+        
+        } catch (Exception $e) {
+            $msg['msg'] = $e->getMessage();
+            $msg['status'] = 0;
+            return $msg;
+        }
     }
 
     public function updatePaypalInfo($data = [])
@@ -557,4 +661,35 @@ class User extends MyAppModel
         return empty($teacher) ? false : $teacher;
     }
 
+    /**
+     * Update Refferer
+     * 
+     * @param int $Refferer
+     * @return bool
+     */
+    public function updateRefferer(int $refferer = 1): bool
+    {
+        if (empty($this->mainTableRecordId)) {
+            $this->error = Label::getLabel('ERR_INVALID_REQUEST');
+            return false;
+        }
+        $this->setFlds(['refferer' => $refferer]);
+        if (!$this->save()) {
+            return false;
+        }
+        return true;
+    }
+
+    public function updateReffererPaid(): bool
+    {
+        if (empty($this->mainTableRecordId)) {
+            $this->error = Label::getLabel('ERR_INVALID_REQUEST');
+            return false;
+        }
+        $this->setFlds(['refferer_paid' => 1]);
+        if (!$this->save()) {
+            return false;
+        }
+        return true;
+    }
 }

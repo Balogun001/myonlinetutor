@@ -249,13 +249,15 @@ class UserAuth extends FatModel
 
     public function signup(array $data): bool
     {
+
         if (
-                empty($data['user_email']) || empty($data['user_password']) ||
-                empty($data['user_first_name']) || !isset($data['user_last_name'])
+            empty($data['user_email']) || empty($data['user_password']) ||
+            empty($data['user_first_name']) || !isset($data['user_last_name'])
         ) {
             $this->error = Label::getLabel('MSG_USER_COULD_NOT_BE_SET');
             return false;
         }
+
         $userData = [
             'user_dashboard' => User::LEARNER,
             'user_registered_as' => User::LEARNER,
@@ -264,35 +266,48 @@ class UserAuth extends FatModel
             'user_last_name' => $data['user_last_name'],
             'user_lang_id' => MyUtility::getSiteLangId(),
             'user_timezone' => MyUtility::getSiteTimezone(),
+            'user_country_id' => 0,
         ];
+
+        // New Line Added By RIGIC 'user_country_id'=>0, 
+
         $db = FatApp::getDb();
         if (!$db->startTransaction()) {
             $this->error = Label::getLabel('ERR_SOMETHING_WENT_WRONG');
             return false;
         }
+
         $user = new User();
         $user->assignValues($userData);
         if (FatApp::getConfig('CONF_EMAIL_VERIFICATION_REGISTRATION') == AppConstant::NO) {
+
             $user->setFldValue('user_verified', date('Y-m-d H:i:s'));
         }
+
         if (empty(FatApp::getConfig('CONF_ADMIN_APPROVAL_REGISTRATION'))) {
             $user->setFldValue('user_active', AppConstant::YES);
         }
+
         if (!$user->save()) {
+            //From Here Code Not Working (RGCUSTOM)
+
             $db->rollbackTransaction();
             $this->error = Label::getLabel('MSG_USER_COULD_NOT_BE_SET');
             return false;
         }
+
         if (!$user->setSettings($userData)) {
             $db->rollbackTransaction();
             $this->error = Label::getLabel('MSG_USER_COULD_NOT_BE_SET');
             return false;
         }
+
         if (!$user->setPassword($data['user_password'])) {
             $db->rollbackTransaction();
             $this->error = Label::getLabel('MSG_USER_COULD_NOT_BE_SET');
             return false;
         }
+        //die('s1');
         if (!$user->assignGiftCard($data['user_email'])) {
             $db->rollbackTransaction();
             $this->error = Label::getLabel('MSG_USER_COULD_NOT_BE_SET');
@@ -302,6 +317,31 @@ class UserAuth extends FatModel
             $this->error = Label::getLabel('ERR_SOMETHING_WENT_WRONG');
             return false;
         }
+
+        if (isset($_SESSION['ref'])) {
+            $refferal = new AffiliateRefferalHistory();
+            $data = $refferal->getDetail($_SESSION['ref'], session_id());
+            if (isset($data['id'])) {
+                $ref = new AffiliateRefferalHistory($data['id']);
+                if (!$ref->updateRefferal('Signed up', $_POST['user_email'], 'User Signed up using refferal')) {
+                    echo FatUtility::dieJsonError($ref->getError());
+                }
+            } else {
+                $new_refferal = new AffiliateRefferalHistory();
+                $new_refferal->assignValues([
+                    'user_email' => $_POST['user_email'],
+                    'refral_ids' => $_SESSION['ref'],
+                    "session_id" => session_id(),
+                    "descriptions" => "User Signed up using refferal",
+                    "status" => 'Signed up'
+                ]);
+                $new_refferal->save();
+            }
+            if (isset($user['refferer']) && $user['refferer'] == '') {
+                $user->updateRefferer($_SESSION['ref']);
+            }
+        }
+
         return true;
     }
 
@@ -340,7 +380,7 @@ class UserAuth extends FatModel
         }
         if (empty($user['user_verified'])) {
             $link = '<a href="javascript:void(0)" onclick="resendSignupVerifyEmail(' . "'" .
-                    $user['user_email'] . "'" . ')">' . Label::getLabel('LBL_CLICK_HERE') . '</a>';
+                $user['user_email'] . "'" . ')">' . Label::getLabel('LBL_CLICK_HERE') . '</a>';
             $this->error = str_replace("{clickhere}", $link, Label::getLabel('MSG_VERIFICATION_PENDING_{clickhere}_TO_VERIFY'));
             return false;
         }
@@ -538,6 +578,28 @@ class UserAuth extends FatModel
             $this->sendSignupAdminNotifion($userData);
         }
         $userData['user_password'] = NULL;
+
+        if (isset($_SESSION['ref'])) {
+            $refferal = new AffiliateRefferalHistory();
+            $data = $refferal->getDetail($_SESSION['ref'], session_id());
+            if (isset($data['id'])) {
+                $ref = new AffiliateRefferalHistory($data['id']);
+                if (!$ref->updateRefferal('Signed up', $email, 'User Signed up using refferal')) {
+                    echo FatUtility::dieJsonError($ref->getError());
+                }
+            } else {
+                $new_refferal = new AffiliateRefferalHistory();
+                $new_refferal->assignValues([
+                    'user_email' => $email,
+                    'refral_ids' => $_SESSION['ref'],
+                    "session_id" => session_id(),
+                    "descriptions" => "User Signed up using refferal",
+                    "status" => 'Signed up'
+                ]);
+                $new_refferal->save();
+            }
+        }
+
         return $userData;
     }
 
@@ -633,6 +695,27 @@ class UserAuth extends FatModel
         }
         $userData['user_id'] = $userObj->getMainTableRecordId();
         $userData['user_password'] = NULL;
+
+        if (isset($_SESSION['ref'])) {
+            $refferal = new AffiliateRefferalHistory();
+            $data = $refferal->getDetail($_SESSION['ref'], session_id());
+            if (isset($data['id'])) {
+                $ref = new AffiliateRefferalHistory($data['id']);
+                if (!$ref->updateRefferal('Signed up', $email, 'User Signed up using refferal')) {
+                    echo FatUtility::dieJsonError($ref->getError());
+                }
+            } else {
+                $new_refferal = new AffiliateRefferalHistory();
+                $new_refferal->assignValues([
+                    'user_email' => $email,
+                    'refral_ids' => $_SESSION['ref'],
+                    "session_id" => session_id(),
+                    "descriptions" => "User Signed up using refferal",
+                    "status" => 'Signed up'
+                ]);
+                $new_refferal->save();
+            }
+        }
         return $userData;
     }
 
@@ -766,5 +849,4 @@ class UserAuth extends FatModel
         $frm->addSubmitButton('', 'btn_submit', Label::getLabel('LBL_LOGIN'));
         return $frm;
     }
-
 }

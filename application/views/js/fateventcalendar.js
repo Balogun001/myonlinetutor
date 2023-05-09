@@ -81,6 +81,30 @@ var FatEventCalendar = function (teacherId, offset) {
         tooltip.css("z-index", 10000);
         tooltip.removeClass("d-none");
     };
+    getSimpleCalendarSlotBookingConfirmationBox = function (calEvent, isFreetrial) {
+        isFreetrial = isFreetrial ? isFreetrial : false;
+        var start = moment(calEvent.start).format("HH:mm");
+        var end = moment(calEvent.end).format("HH:mm");
+        let tooltip = jQuery(".tooltipevent-wrapper-js");
+        let tooltipevent = jQuery(".tooltipevent-wrapper-js");
+        selectedStartDateTime = moment(calEvent.start).format("YYYY-MM-DD HH:mm:ss");
+        selectedEndDateTime = moment(calEvent.end).format("YYYY-MM-DD HH:mm:ss");
+        if (tooltip.find(".book-freetrial-js").length > 0) {
+            cart.prop.ordles_starttime = selectedStartDateTime;
+            cart.prop.ordles_endtime = selectedEndDateTime;
+        }
+        if (tooltip.find("#lesson_starttime").length > 0) {
+            tooltip.find("#lesson_starttime").val(selectedStartDateTime);
+        }
+        if (tooltip.find("#lesson_endtime").length > 0) {
+            tooltip.find("#lesson_endtime").val(selectedEndDateTime);
+        }
+        tooltip.find(".displayEventDate").html(moment(calEvent.start).format("MMMM, DD, YYYY"));
+        tooltip.find(".displayEventTime").html(start + " - " + end);
+        tooltipevent.css({position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,0)"});
+        tooltip.css("z-index", 10000);
+        tooltip.removeClass("d-none");
+    };
     updateLessonList = function (calendar) {
         let index = 0;
         for (id in cart.prop.slots) {
@@ -489,4 +513,312 @@ FatEventCalendar.prototype.bookingCalendar = function (currentTime, duration, bo
     jQuery(document).bind('close.facebox', function () {
         jQuery('body > .tooltipevent').remove();
     });
+};
+
+FatEventCalendar.prototype.simpleCalendar = function (currentTime, duration, bookingBefore, days) {
+    let calendarStart = moment(currentTime).format('YYYY-MM-DD');
+
+    let bookingBeforeDate = moment().add(bookingBefore, 'minutes');
+
+    let fecal = this;
+
+	let teacherId = fecal.teacherId;
+
+    var element = $('#booking');
+
+	// remove all elements inside the element
+	element.empty();
+
+	// Header
+	element.append('<div class="calender-header"><div class="calender-button to-left"><span class="fc-icon fc-icon-chevron-left"></span></div><div class="dateRange"></div><div class="calender-button to-right"><span class="fc-icon fc-icon-chevron-right"></span></div></div>');
+
+	// handle calender button in header
+	element.find('.calender-button').on('click', function () {
+		if ($(this).hasClass('to-left')) {
+			fecal.simpleCalendar(moment(currentTime).subtract(7, 'days').format('YYYY-MM-DD'), duration, bookingBefore, days);
+		} else {
+			fecal.simpleCalendar(moment(currentTime).add(7, 'days').format('YYYY-MM-DD'), duration, bookingBefore, days);
+		}
+	});
+
+	// Update element.find(.dateRange) with the calendarStart and 6 days after calendarStart
+	element.find('.dateRange').html(moment(calendarStart).format('DD MMM YYYY') + ' - ' + moment(calendarStart).add(6, 'days').format('DD MMM YYYY'));
+
+	/**
+	 * Add calendar list
+	 */
+	var calendarList = $('<div class="calendar-list"><div class="row"></div></div>');
+
+	// Add 7 days to the calendar list
+	for (var i = 0; i < 7; i++) {
+		var day = $('<div class="col-sm"><div class="date"><div>' + moment(calendarStart).add(i, 'days').format('ddd') + '</div><div>' + moment(calendarStart).add(i, 'days').format('D') + '</div></div><div class="times"></div></div>');
+
+		calendarList.find('.row').append(day);
+	}
+
+	/**
+	 * Get time available for booking
+	 */
+	let rangeMinutes = 15;
+
+	$.ajax({
+		url: fcom.makeUrl('Teachers', 'getAvailabilityJsonData', [teacherId]),
+		type: 'POST',
+		dataType: 'json',
+		data: {
+			start: moment(currentTime).format('YYYY-MM-DD 00:00:00'),
+			end: moment(currentTime).add(7, 'days').format('YYYY-MM-DD 00:00:00'),
+			bookingBefore: bookingBefore,
+			fOutMode: 'json',
+			fIsAjax: 1
+		},
+		success: function (response) {
+			let availableTimes = response;
+
+			let times = [];
+
+			$.each(availableTimes.data, function (index, value) {
+				let startTime = moment(value.start);
+				let endTime = moment(value.end).subtract(duration, 'minutes');
+
+				for (let current = startTime.clone(); current.isSameOrBefore(endTime); current.add(rangeMinutes, 'minutes')) {
+					if (current.isBefore(bookingBeforeDate)) continue;
+
+					times.push(current.format('YYYY-MM-DD HH:mm:ss'));
+				}
+			});
+
+			$.each(times, function (index, value) {
+				let time = moment(value);
+
+                let endTime = time.clone().add(duration, 'minutes');
+
+				let itemDate = calendarList.find('.col-sm .date').filter(function () {
+					return $(this).text().trim() == time.format('ddd') + time.format('D');
+				});
+
+				if (!itemDate) return;
+
+				let item = itemDate.parent();
+
+				let timeElement = $('<div class="time" data-start="' + time.format('YYYY-MM-DD HH:mm:ss') +  '" data-end="' + endTime.format('YYYY-MM-DD HH:mm:ss') +  '">' + time.format('HH:mm') + ' - ' + endTime.format('HH:mm') + '</div>');
+
+				item.append(timeElement);
+			});
+
+			calendarList.find('.col-sm').filter(function () {
+				return $(this).find('.time').length < 1;
+			}).find('.date').addClass('disabled');
+
+			// Handle time click
+			calendarList.find('.col-sm .time').on('click', function () {
+				let el = $(this);
+
+				let eventStart = moment(el.data('start'));
+
+				let eventEnd = moment(el.data('end'));
+
+				let id = eventStart.format('YYYYMMDDHHmmss');
+
+				if (el.hasClass('active')) {
+					el.removeClass('active');
+
+					delete cart.prop.slots[id];
+				} else {
+					Object.keys(cart.prop.slots).forEach(function (key) {
+						let slot = cart.prop.slots[key];
+						let slotStart = moment(slot.ordles_starttime);
+						let slotEnd = moment(slot.ordles_endtime);
+
+						if (eventStart.isBetween(slotStart, slotEnd) || eventEnd.isBetween(slotStart, slotEnd)) {
+							delete cart.prop.slots[key];
+
+							$('.calendar-list .time[data-start="' + slot.ordles_starttime + '"]').removeClass('active');
+						}
+					});
+
+					let event = {
+						start: eventStart.format('YYYY-MM-DD HH:mm:ss'),
+						end: eventEnd.format('YYYY-MM-DD HH:mm:ss'),
+						display: 'block',
+						overlap: false,
+						id: id,
+						extendedProps: {
+							id: id,
+							sessionEvent: true
+						},
+					};
+
+					cart.prop.slots[event.id] = {
+						ordles_starttime: event.start,
+						ordles_endtime: event.end
+					};
+
+					if (Object.keys(cart.prop.slots).length > cart.prop.ordles_quantity) {
+						let slot = cart.prop.slots[Object.keys(cart.prop.slots)[0]];
+
+						$('.calendar-list .time[data-start="' + slot.ordles_starttime + '"]').removeClass('active');
+
+						delete cart.prop.slots[Object.keys(cart.prop.slots)[0]];
+					}
+
+					el.addClass('active');
+				}
+			});
+
+			// Handle selected item
+			Object.keys(cart.prop.slots).forEach(function (key) {
+				let slot = cart.prop.slots[key];
+
+				$('.calendar-list .time[data-start="' + slot.ordles_starttime + '"]').addClass('active');
+			});
+		}
+	});
+
+	element.append(calendarList);
+};
+
+FatEventCalendar.prototype.simpleCalendarTrial = function (currentTime, duration, bookingBefore, selectable) {
+    let calendarStart = moment(currentTime).format('YYYY-MM-DD');
+
+    let bookingBeforeDate = moment().add(bookingBefore, 'minutes');
+
+    let fecal = this;
+
+	let teacherId = fecal.teacherId;
+
+    var element = $('#' + (selectable ? "d_calendarfree_trial" : "d_calendar"));
+
+    var checkSlotAvailabiltAjaxRun = false;
+
+	// remove all elements inside the element
+	element.empty();
+
+	// Header
+	element.append('<div class="calender-header"><div class="calender-button to-left"><span class="fc-icon fc-icon-chevron-left"></span></div><div class="dateRange"></div><div class="calender-button to-right"><span class="fc-icon fc-icon-chevron-right"></span></div></div>');
+
+	// handle calender button in header
+	element.find('.calender-button').on('click', function () {
+		if ($(this).hasClass('to-left')) {
+			fecal.simpleCalendarTrial(moment(currentTime).subtract(7, 'days').format('YYYY-MM-DD'), duration, bookingBefore, selectable);
+		} else {
+			fecal.simpleCalendarTrial(moment(currentTime).add(7, 'days').format('YYYY-MM-DD'), duration, bookingBefore, selectable);
+		}
+	});
+
+	// Update element.find(.dateRange) with the calendarStart and 6 days after calendarStart
+	element.find('.dateRange').html(moment(calendarStart).format('DD MMM YYYY') + ' - ' + moment(calendarStart).add(6, 'days').format('DD MMM YYYY'));
+
+	/**
+	 * Add calendar list
+	 */
+	var calendarList = $('<div class="calendar-list"><div class="row"></div></div>');
+
+	// Add 7 days to the calendar list
+	for (var i = 0; i < 7; i++) {
+		var day = $('<div class="col-sm"><div class="date"><div>' + moment(calendarStart).add(i, 'days').format('ddd') + '</div><div>' + moment(calendarStart).add(i, 'days').format('D') + '</div></div><div class="times"></div></div>');
+
+		calendarList.find('.row').append(day);
+	}
+
+	/**
+	 * Get time available for booking
+	 */
+	let rangeMinutes = 15;
+
+	$.ajax({
+		url: fcom.makeUrl('Teachers', 'getAvailabilityJsonData', [teacherId]),
+		type: 'POST',
+		dataType: 'json',
+		data: {
+			start: moment(currentTime).format('YYYY-MM-DD 00:00:00'),
+			end: moment(currentTime).add(7, 'days').format('YYYY-MM-DD 00:00:00'),
+			bookingBefore: bookingBefore,
+			fOutMode: 'json',
+			fIsAjax: 1
+		},
+		success: function (response) {
+			let availableTimes = response;
+
+			let times = [];
+
+			$.each(availableTimes.data, function (index, value) {
+				let startTime = moment(value.start);
+				let endTime = moment(value.end).subtract(duration, 'minutes');
+
+				for (let current = startTime.clone(); current.isSameOrBefore(endTime); current.add(rangeMinutes, 'minutes')) {
+					if (current.isBefore(bookingBeforeDate)) continue;
+
+					times.push(current.format('YYYY-MM-DD HH:mm:ss'));
+				}
+			});
+
+			$.each(times, function (index, value) {
+				let time = moment(value);
+
+                let endTime = time.clone().add(duration, 'minutes');
+
+				let itemDate = calendarList.find('.col-sm .date').filter(function () {
+					return $(this).text().trim() == time.format('ddd') + time.format('D');
+				});
+
+				if (!itemDate) return;
+
+				let item = itemDate.parent();
+
+				let timeElement = $('<div class="time" data-start="' + time.format('YYYY-MM-DD HH:mm:ss') +  '" data-end="' + endTime.format('YYYY-MM-DD HH:mm:ss') +  '">' + time.format('HH:mm') + ' - ' + endTime.format('HH:mm') + '</div>');
+
+				item.append(timeElement);
+			});
+
+			calendarList.find('.col-sm').filter(function () {
+				return $(this).find('.time').length < 1;
+			}).find('.date').addClass('disabled');
+
+			// Handle time click
+			calendarList.find('.col-sm .time').on('click', function () {
+				let el = $(this);
+				let start = moment(el.data('start'));
+
+                jQuery("body #d_calendar .closeon").click();
+                jQuery("#loaderCalendar").show();
+                if (checkSlotAvailabiltAjaxRun) {
+                    return false;
+                }
+                let end = moment(el.data('start')).add(duration, "minutes");
+                let bookingBeforeDate = moment(currentTime).add(bookingBefore, "hours");
+                if (start < bookingBeforeDate) {
+                    jQuery("#loaderCalendar").hide();
+                    jQuery("body").css({cursor: "default", "pointer-events": "initial"});
+                    return false;
+                }
+                $.loader.show();
+                checkSlotAvailabiltAjaxRun = true;
+                let event = {
+                    start: start.format("YYYY-MM-DD HH:mm:ss"),
+                    end: end.format("YYYY-MM-DD HH:mm:ss"),
+                };
+                fcom.updateWithAjax(fcom.makeUrl("Teachers", "checkSlotAvailability", [fecal.teacherId]), event, function (res) {
+                    $.loader.hide();
+                    checkSlotAvailabiltAjaxRun = false;
+                    jQuery("#loaderCalendar").hide();
+                    jQuery("body").css({cursor: "default", "pointer-events": "initial", });
+                    if (res.status == 0) {
+                        jQuery("body > .tooltipevent").remove();
+                        return;
+                    }
+                    this.getSimpleCalendarSlotBookingConfirmationBox(event, true);
+                }, {failed: true});
+			});
+
+			// Handle selected item
+			Object.keys(cart.prop.slots).forEach(function (key) {
+				let slot = cart.prop.slots[key];
+
+				$('.calendar-list .time[data-start="' + slot.ordles_starttime + '"]').addClass('active');
+			});
+		}
+	});
+
+	element.append(calendarList);
 };

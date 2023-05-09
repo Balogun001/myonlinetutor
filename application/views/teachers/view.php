@@ -37,8 +37,356 @@ if ($siteUserId == $teacher['user_id']) {
     $contactClick = '';
 }
 ?>
+<style>
+    .avtar--xlarge{
+        width: 362px;
+        height: 447px;
+        border-radius: 0;
+        background-color: transparent;
+    }
+    .avtar img{
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+    }
+    .tutor-name h4{
+        font-weight: 700;
+       
+    }
+    .info-wrapper .info-tag span{
+        opacity: 1;
+    }
+    .flag{
+        margin-left: 20px;
+    }
+.tutor-lang span, .speaks-list .txt-inline__tag {
+        background: #DDDDDD;
+        border-radius: 6px;
+       
+        color: #000000;
+        padding: 8px;
+        margin-left: 20px;
+        display: inline-block;
+        white-space: nowrap;
+        margin-bottom: 10px;
+    }
+
+    .content__row p.speaks-list {
+    font-size: 0;
+    flex-wrap: wrap;
+}
+    .tutor-lang b,.speaks-list-title{
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 36px;
+    }
+    h4.speaks-list-title,.speaks-list{
+        display: inline-flex;
+        align-items: center;
+        margin: 0;
+    }
+    .flex{
+        display: flex;
+    }
+    .speaks-list{
+        font-size: 0;
+    }
+    .detail-wrapper .profile-detail .info-wrapper,.tutor-lang,.mb-20{
+        margin-bottom: 20px !important;
+    }
+    .detail-actions .btn {
+        border: 1px solid #FF5200;
+        font-weight: 600;
+        color: #fff !important;
+        background: #FF5200;
+        border-radius: 8px;
+        padding: 19px 40px;
+        height: auto;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 24px;
+    }
+    .detail-actions .btn:hover{
+        background-color: var(--color-primary);
+        border-color: var(--color-primary)
+    
+    }
+    .box--book{
+        padding : 20px;
+        background: #F7F7F7;
+        border-radius: 0 0 16px 16px;
+    }
+    .ratings{
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .teachers-view-rate {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+    .ratings-inner {
+        display: flex;
+        align-items: center;
+    }
+
+    .ratings span {
+        opacity: 1;
+        font-weight: 300;
+        font-size: 16px;
+        line-height: 24px;
+    }
+    .book__actions .btn{
+        height: 66px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 26px;
+        margin-bottom: 20px;
+    }
+    .book__actions .btn--trial.book-trial-lesson {
+        margin: 0;
+        background: #2765F1;
+        border-radius: 8px;
+        
+    }
+    .book__actions .btn--contact{
+        border-color: #2765F1;
+        color:#2765F1;
+    }
+    .book__actions .btn--trial.book-trial-lesson{
+        margin-bottom: 20px;
+    }
+    .profile-primary .panel-cover{
+        border: 1px solid #B3B3B3;
+        border-radius: 16px;   
+        padding : 40px; 
+        margin-bottom: 80px;
+    }
+
+    .profile-cover .profile-head{
+        margin-bottom: 70px;
+    }
+
+    .slider--prices .card .card__head::before{
+        display: none;
+    }
+    .slider--prices .card .card__head h4{
+        color: #FF5200 !important;
+    }
+    .lesson-slot-info ul li a .space{
+        border-bottom : none;
+    }
+    .content--tick .content__head h4 {
+        color: #2765F1;
+    
+    }
+    .content--tick ul li:before{
+        display: none;
+        
+    }
+    .content--tick ul li{
+        padding-left: 0;
+        flex: auto;
+        background: #DDDDDD;
+        border-radius: 8px;
+        font-weight: 400;
+   
+        color: #000000;
+        max-width: max-content;
+        margin-right: 24px;
+        padding: 4px 8px;
+        margin: 5px 24px 5px 0;
+    }
+    .content--tick ul li:last-child{
+        margin-left: 0;
+    }
+    .panel-cover .panel-cover__body{
+        margin-top: 40px;
+    }
+    .time-line h4 {
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 42px;
+        color: #2765F1;
+        margin-bottom: 40px;
+    }
+    .resume-wrapper .resume__primary::before{
+        right: auto;
+        top: 0;
+        left: 14px;
+        background : #858585;
+    }
+    .resume-wrapper .resume__primary::after{
+        left: 10px;
+        right: auto;
+        background : #858585;
+
+    }
+    .resume-wrapper .resume__primary {
+        padding-left: 24px;
+        color: #000;
+    }
+    .profile-primary .panel-cover:last-child{
+        border: 1px solid #B3B3B3;
+    }
+    .resume__secondary{
+        color: #000;
+    }
+    .content__row p.speaks-list .txt-inline__tag{
+        line-height : 1.7;
+        font-size :1rem;
+    }
+    @media (min-width: 1199px){
+        .detail-wrapper .profile__media{
+            margin-right: 40px;
+        }
+        .detail-wrapper .tutor-name h4{
+            font-size: 60px;
+            line-height: 76px;
+        }
+        .detail-wrapper .profile-detail .info-wrapper span{
+            font-size: 20px;
+            line-height: 30px;
+        }
+            .tutor-lang span, .speaks-list .txt-inline__tag{
+            font-size: 20px;
+            line-height: 30px;
+    }
+
+    .content__row p {
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 36px;
+    }
+    .content__row p.speaks-list .txt-inline__tag{
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 30px;
+}
+.har-rate,.ratings {
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 36px;
+    }
+    .content--tick .content__head h4 {
+        color: #2765F1;
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 42px;
+    }
+    .profile-primary .panel-cover .panel-cover__head h3{
+        font-weight: 700;
+        font-size: 38px;
+        line-height: 48px;
+    }
+    .content--tick ul li{
+       
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 36px;
+       
+    }
+    }
+    @media(min-width: 767px){
+        .panel-head__right{
+            right: 40px;
+        }
+   
+    }
+
+    @media(max-width: 767px){
+        .profile-primary .panel-cover {
+                border: 1px solid #B3B3B3;
+                border-radius: 0;
+                padding: 15px;
+                margin-bottom: 18px;
+            }
+
+        
+            .btn-write-review{
+                position: relative;
+                left: 0;
+                top: 0;
+                margin-top: 15px;
+            }
+            .review-rating-middle {
+                padding-bottom: 24px;
+                border-bottom: 1px solid #A7B6E9;
+                margin-bottom: 30px;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .profile-detail .tutor-name img{
+                max-width: 20px;
+                height: auto;
+            }
+            .tutor-lang b, .speaks-list-title{
+                font-size: 15px;
+                line-height: 20px;
+            }
+            .tutor-lang span, .speaks-list .txt-inline__tag{
+                font-size: 12px;
+            }
+            .toggle-dropdown{
+                width: 100%;
+            }
+            .detail-actions .btn, .detail-actions .btn.btn--link {
+                width: 100%;
+                display: block;
+                text-align: center;
+                margin: 10px 0;
+                font-size: 12px;
+                padding: 12px 40px;
+            }
+            .profile-cover .profile-head{
+                margin-bottom:0;
+            }
+            .book__actions .btn {
+                height: 50px;
+                font-size: 14px;
+                line-height: 26px;
+            }
+            .slick-dots li button{
+                width: 18px;
+            }
+
+            
+    }
+    
+.book__actions .btn.btn--bordered.color-primary.btn--contact:hover {
+    background-color: #2765F1;
+    color: #fff !important;
+}
+@media(max-width: 1270px){
+    .section-update, .section-update.section-how-it-works, .section--listing, .section.section--profile{
+        padding: 80px 0;
+    }
+}
+
+@media(max-width: 767px){
+	.tutor-lang {
+    display: flex;
+    flex-wrap: wrap;
+}
+.tutor-lang b {
+    flex: 0 0 100%;
+    margin-bottom: 12px;
+}
+
+.tutor-lang span {
+    margin-left: 0;
+    margin-right: 20px;
+}
+}
+
+
+
+</style>
+
 <section class="section section--profile">
-    <div class="container container--fixed">
+    <div class="container">
         <div class="profile-cover">
             <div class="profile-head">
                 <div class="detail-wrapper">
@@ -54,38 +402,47 @@ if ($siteUserId == $teacher['user_id']) {
                         <div class="profile-detail__head">
                             <div class="tutor-name">
                                 <h4><?php echo $teacher['user_first_name'] . ' ' . $teacher['user_last_name']; ?></h4>
-                                <div class="flag">
-                                    <?php if ($teacher['user_country_id'] > 0) { ?>
-                                    <img src="<?php echo CONF_WEBROOT_FRONTEND . 'flags/' . strtolower($teacher['user_country_code']) . '.svg'; ?>" alt="<?php echo $teacher['user_country_name']; ?>" style="border: 1px solid #000;" />
-                                    <?php } ?>
-                                </div>
+                                <img src="/images/ic_baseline-verified-user.png" height="40" width="40" alt="Verified">
+                               
                             </div>
                             <?php if (!empty($teacher['offers'])) { ?>
                                 <?php $this->includeTemplate('_partial/offers.php', ['offers' => $teacher['offers']], false); ?>
                             <?php } ?>
                         </div>
                         <div class="profile-detail__body">
+
                             <div class="info-wrapper">
                                 <div class="info-tag location">
-                                    <svg class="icon icon--location">
-                                        <use xlink:href=" <?php echo CONF_WEBROOT_URL . 'images/sprite.svg#location' ?>"></use>
-                                    </svg>
+                                    <!-- <svg class="icon icon--location">
+                                        <use xlink:href=" <?php //echo CONF_WEBROOT_URL . 'images/sprite.svg#location' ?>"></use>
+                                    </svg> -->
                                     <span class="lacation__name"><?php echo $teacher['user_country_name']; ?></span>
+                                    <div class="flag">
+                                        <?php if ($teacher['user_country_id'] > 0) { ?>
+                                        <img src="<?php echo CONF_WEBROOT_FRONTEND . 'flags/' . strtolower($teacher['user_country_code']) . '.svg'; ?>" alt="<?php echo $teacher['user_country_name']; ?>"  width="28" height="20"/>
+                                        <?php } ?>
+                                    </div>
                                 </div>
-                                <div class="info-tag ratings">
-                                    <svg class="icon icon--rating">
-                                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#rating' ?>"></use>
-                                    </svg>
-                                    <span class="value"><?php echo $teacher['testat_ratings']; ?></span>
-                                    <span class="count"><?php echo  $teacher['testat_reviewes'] . ' ' . Label::getLabel('LBL_REVIEW(S)'); ?></span>
-                                </div>
-                                <div class="info-tag list-count">
-                                    <div class="total-count"><span class="value"><?php echo $teacher['testat_students']; ?></span><?php echo Label::getLabel('LBL_Students') ?></div>
-                                    <div class="total-count"><span class="value"><?php echo $teacher['testat_lessons'] + $teacher['testat_classes']; ?></span><?php echo Label::getLabel('LBL_SESSIONS'); ?></div>
-                                </div>
+
+
+                                
                             </div>
-                            <div class="har-rate"><?php echo Label::getLabel('LBL_TEACHER_PRICING'); ?><b> <?php echo MyUtility::formatMoney($teacher['testat_minprice']); ?> - <?php echo MyUtility::formatMoney($teacher['testat_maxprice']); ?></b></div>
-                            <div class="tutor-lang"><b><?php echo Label::getLabel('LBL_TEACHES:'); ?></b> <?php echo $teacher['teacherTeachLanguageName']; ?></div>
+                            <?php
+                                $arrayteacherTeachLanguageName = explode(',', $teacher['teacherTeachLanguageName']);
+                            ?>
+                            
+                            <div class="tutor-lang"><b><?php echo Label::getLabel('LBL_TEACHES:'); ?></b> <?php //echo $teacher['teacherTeachLanguageName']; ?>
+                                <?php 
+                                    for($i=0;$i<count($arrayteacherTeachLanguageName);$i++){
+                                        echo "<span>".$arrayteacherTeachLanguageName[$i]."</span>";
+                                    }
+                                ?>
+                        
+                        </div>
+                            <div class="content__row flex mb-20">
+                                <h4 class="speaks-list-title"><?php echo Label::getLabel('LBL_Speaks'); ?></h4>
+                                <p class="speaks-list"><?php $this->includeTemplate('teachers/_partial/SpeakLanguages.php', $teacher, false); ?></p>
+                            </div>
                         </div>
                     </div>
                     <div class="detail-actions">
@@ -133,10 +490,7 @@ if ($siteUserId == $teacher['user_id']) {
                         <div class="content__row">
                             <p><?php echo nl2br($teacher['user_biography']); ?></p>
                         </div>
-                        <div class="content__row">
-                            <h4><?php echo Label::getLabel('LBL_Speaks'); ?></h4>
-                            <p><?php $this->includeTemplate('teachers/_partial/SpeakLanguages.php', $teacher, false); ?></p>
-                        </div>
+                        
                     </div>
                 </div>
                 <div class="panel-cover" id="lessons-prices">
@@ -272,7 +626,7 @@ if ($siteUserId == $teacher['user_id']) {
                     <div class="panel-cover__head panel__head-trigger panel__head-trigger-js">
                         <h3><?php echo Label::getLabel('LBL_TEACHING_QUALIFICATIONS'); ?></h3>
                     </div>
-                    <div class="panel-cover__body panel__body-target panel__body-target-js" id="qualificationsList">
+                    <div class="panel-cover__body panel__body-target panel__body-target-js time-line" id="qualificationsList">
                         <?php
                         foreach ($qualificationType as $type => $name) {
                             if (empty($userQualifications[$type])) {
@@ -282,12 +636,12 @@ if ($siteUserId == $teacher['user_id']) {
                         ?>
                             <div class="row row--resume">
                                 <?php foreach ($userQualifications[$type] as $qualification) { ?>
-                                    <div class="col-xl-4 col-lg-4 col-sm-4">
+                                    <div class="col-12">
                                         <?php
                                         if ($first) {
                                             $first = false;
                                         ?>
-                                            <h4 class="color-dark"><?php echo $name; ?></h4>
+                                            <h4 class="color-dar k"><?php echo $name; ?></h4>
                                         <?php } ?>
                                     </div>
                                     <div class="col-xl-8 col-lg-8 col-sm-8">
@@ -313,21 +667,30 @@ if ($siteUserId == $teacher['user_id']) {
                 </div>
                 <?php if ($teacher['testat_reviewes'] > 0) { ?>
                     <div class="panel-cover">
-                        <div class="panel-cover__head panel__head-trigger panel__head-trigger-js">
+                        <!--div class="panel-cover__head panel__head-trigger panel__head-trigger-js">
                             <h3><?php echo Label::getLabel('LBL_REVIEW'); ?></h3>
+                        </div-->
+                        <div class="panel-cover__head panel__head-trigger panel__head-trigger-js">
+                            <div class="flex ">
+							
+                            <?php //$cntreview=count($reviews); ?>
+                                <!--h3> Reviews (<?php echo $cntreview; ?>)</h3-->
+								 <h3> Reviews (1)</h3-->
+                            </div>
                         </div>
-                        <?php echo $reviewFrm->getFormHtml(); ?>
+                        
                         <div class="panel-cover__body panel__body-target panel__body-target-js">
-                            <div class="rating-details">
+                        <?php echo $reviewFrm->getFormHtml(); ?>
+                            <!--div class="rating-details">
                                 <div class="rating__count">
                                     <h1><?php echo FatUtility::convertToType($teacher['testat_ratings'], FatUtility::VAR_FLOAT); ?></h1>
                                 </div>
                                 <div class="rating__info">
                                     <b><?php echo Label::getLabel('LBL_OVERALL_RATINGS'); ?></b>
                                 </div>
-                            </div>
+                            </div-->
                             <div class="reviews-wrapper">
-                                <div class="reviews-wrapper__head">
+                                <div class="reviews-wrapper__head" style="display:none;">
                                     <p id="recordToDisplay"></p>
                                     <div class="review__shorting">
                                         <select name="sorting" onchange="loadReviews('<?php echo $teacher['user_id']; ?>', 1)">
@@ -341,7 +704,7 @@ if ($siteUserId == $teacher['user_id']) {
                                 <div id="listing-reviews" class="reviews-wrapper__body"></div>
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 <?php } ?>
             </div>
             <div class="profile-secondary">
@@ -353,21 +716,37 @@ if ($siteUserId == $teacher['user_id']) {
                             </div>
                         </div>
                         <div class="-gap"></div>
+                       
                     <?php
                     }
                     ?>
                     <div class="box box--book">
+                        <div class="flex justify-content-center">
+                            <div class="info-tag ratings">
+                                <div class="ratings-inner">
+                                    <span class="value"><?php echo $teacher['testat_ratings']; ?></span>
+                                    <svg class="icon icon--rating">
+                                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#rating' ?>"></use>
+                                    </svg>
+                                </div>
+                                <div class="teachers-view-rate">
+                                    <span class="count"><?php echo  $teacher['testat_reviewes'] . ' ' . Label::getLabel('LBL_REVIEW(S)'); ?></span>
+                                    
+                                </div>
+                            </div>
+                            <div>
+                                <!-- <div class="har-rate"><?php echo Label::getLabel('LBL_TEACHER_PRICING'); ?><b> <?php echo MyUtility::formatMoney($teacher['testat_minprice']); ?> - <?php echo MyUtility::formatMoney($teacher['testat_maxprice']); ?></b></div> -->
+                                <div class="har-rate"><?php echo MyUtility::formatMoney($teacher['testat_minprice']); ?> - <?php echo MyUtility::formatMoney($teacher['testat_maxprice']); ?></div>
+                            </div>
+                        </div>
+                            <!-- <div class="info-tag list-count">
+                                <div class="total-count"><span class="value"><?php echo $teacher['testat_students']; ?></span><?php echo Label::getLabel('LBL_Students') ?></div>
+                                <div class="total-count"><span class="value"><?php echo $teacher['testat_lessons'] + $teacher['testat_classes']; ?></span><?php echo Label::getLabel('LBL_SESSIONS'); ?></div>
+                            </div> -->
+                        
                         <div class="book__actions">
-                            <a href="javascript:void(0);" class="btn btn--primary btn--xlarge btn--block color-white <?php echo $disabledClass; ?>" <?php echo $bookNowOnClickClick; ?>><?php echo Label::getLabel('LBL_Book_Now'); ?></a>
-                            <a href="javascript:void(0);" <?php echo $contactClick; ?> class="btn btn--bordered btn--xlarge btn--block btn--contact color-primary <?php echo $disabledClass; ?>">
-                                <svg class="icon icon--envelope">
-                                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#envelope'; ?>"></use>
-                                </svg>
-                                <?php echo Label::getLabel('LBL_CONTACT'); ?>
-                            </a>
-                            <a href="#availbility" onclick="viewFullAvailbility()" class="color-primary btn--link scroll"><?php echo Label::getLabel('LBL_VIEW_FULL_AVAILBILITY'); ?></a>
-                            <div class="-gap"></div>
-                            <div class="-gap"></div>
+                            <!-- <a href="javascript:void(0);" class="btn btn--primary btn--xlarge btn--block color-white <?php echo $disabledClass; ?>" <?php echo $bookNowOnClickClick; ?>><?php echo Label::getLabel('LBL_Book_Now'); ?></a> -->
+                            <a href="javascript:void(0);" class="btn btn--secondary  btn--xlarge btn--block color-white <?php echo $disabledClass; ?>" <?php echo $bookNowOnClickClick; ?>>Book Tutor</a>
                             <?php
                             if ($freeTrialEnabled) {
                                 $btnText = "LBL_YOU_ALREADY_HAVE_AVAILED_THE_TRIAL";
@@ -385,11 +764,24 @@ if ($siteUserId == $teacher['user_id']) {
                                     $disabledText = "disabled";
                                 }
                             ?>
-                                <a href="javascript:void(0);" <?php echo $onclick; ?> class="btn btn--secondary btn--trial btn--block color-white <?php echo $btnClass . ' ' . $disabledText; ?> " <?php echo $disabledText; ?>>
-                                    <span><?php echo Label::getLabel($btnText); ?></span>
+                                <a href="javascript:void(0);" <?php echo $onclick; ?> class="btn btn--secondary btn--trial btn--block color-white book-trial-lesson <?php echo $btnClass . ' ' . $disabledText; ?> " <?php echo $disabledText; ?>>
+                                    <!-- <span><?php echo Label::getLabel($btnText); ?></span> -->
+                                    <span>Book Trial Lesson</span>
                                 </a>
-                                <p><?php echo Label::getLabel('LBL_TRIAL_LESSON_ONE_TIME'); ?></p>
+                                <!-- <p><?php echo Label::getLabel('LBL_TRIAL_LESSON_ONE_TIME'); ?></p> -->
                             <?php } ?>
+
+                            <a href="javascript:void(0);" <?php echo $contactClick; ?> class="btn btn--bordered btn--xlarge btn--block btn--contact color-primary <?php echo $disabledClass; ?>">
+                                <!-- <svg class="icon icon--envelope">
+                                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#envelope'; ?>"></use>
+                                </svg> -->
+                                <!-- <?php echo Label::getLabel('LBL_CONTACT'); ?> -->
+                                Contact Tutor
+                            </a>
+                            <a href="#availbility" onclick="viewFullAvailbility()" class="color-primary btn--link scroll"><?php echo Label::getLabel('LBL_VIEW_FULL_AVAILBILITY'); ?></a>
+                            <div class="-gap"></div>
+                            <div class="-gap"></div>
+                            
                         </div>
                     </div>
                 </div>
@@ -422,6 +814,9 @@ if ($siteUserId == $teacher['user_id']) {
                 window.viewOnlyCal.render();
             }
         });
+        $('.see-more a').click(function(){
+            $('.see-more-content').toggle();            
+        })
         <?php if ($teacher['testat_reviewes'] > 0) { ?>
             loadReviews('<?php echo $teacher['user_id']; ?>', 1);
         <?php } ?>

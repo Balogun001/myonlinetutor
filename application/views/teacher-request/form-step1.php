@@ -9,6 +9,9 @@ $usrPhoneCode->setFieldTagAttribute('id', 'tereq_phone_code');
 $usrPhone = $frm->getField('tereq_phone_number');
 $usrPhone->setFieldTagAttribute('id', 'tereq_phone_number');
 $usrPhotoId = $frm->getField('user_photo_id');
+if(empty($photoId)){
+	$usrPhotoId->requirements()->setRequired();
+}
 if (MyUtility::getLayoutDirection() == 'rtl') {
     $usrPhone->setFieldTagAttribute('style', 'direction: ltr;text-align:right;');
 }
@@ -107,13 +110,16 @@ if (MyUtility::getLayoutDirection() == 'rtl') {
                                     <div class="caption-wraper">
                                         <label class="field_label">
                                             <?php echo $usrPhotoId->getCaption(); ?> 
-                                            <?php if ($usrPhotoId->requirement->isRequired()) { ?><span class="spn_must_field">*</span><?php } ?>
+                                            <?php /*if ($usrPhotoId->requirement->isRequired()) { ?><span class="spn_must_field">*</span><?php }*/ ?>
+											<span class="spn_must_field">*</span>
                                             <?php if (!empty($photoId)) { ?> &nbsp; &nbsp; <a class="color-secondary" href="<?php echo MyUtility::makeUrl('Image', 'download', [Afile::TYPE_TEACHER_APPROVAL_PROOF, $photoId['file_record_id']]) ?>"><?php echo Label::getLabel('LBL_DOWNLOAD'); ?></a><?php } ?>
                                         </label>
                                     </div>
+									<?php //print_r($photoId); ?>
                                     <div class="field-wraper">
                                         <div class="field_cover">
                                             <?php echo $usrPhotoId->getHtml(); ?>
+											<?php //if (!empty($photoId)){$usrPhotoId->requirements()->setRequired(false);} ?>
                                             <small>(<?php
                                                 $exts = implode(", ", Afile::getAllowedExts(Afile::TYPE_TEACHER_APPROVAL_PROOF));
                                                 $fileSize = MyUtility::convertBitesToMb(Afile::getAllowedUploadSize(Afile::TYPE_TEACHER_APPROVAL_PROOF)) . ' ' . Label::getLabel('LBL_MB');

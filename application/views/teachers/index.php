@@ -24,7 +24,74 @@ $jslabels = json_encode([
         ]);
 ?>
 <script> LABELS = <?php echo $jslabels; ?>;</script> 
-<section class="section section--gray section--listing">
+
+<style>
+    .section-filters {
+        background-color: transparent;
+    }
+    .section-filters:after{
+        display: none;
+    }
+    .section-filters h1{
+        font-weight: 700;
+        font-size: 48px;
+        line-height: 58px;
+        max-width: 1280px;
+        margin: 0 auto;
+
+    }
+    .filter-item{
+        border-right: none;
+    }
+    .filters-layout {
+        box-shadow: none;
+    }
+    .filter-item__label {
+        text-transform: capitalize;
+        font-weight: 400;
+        font-size: 16px;
+        color: #000000;
+        line-height: 24px;
+    }
+    .filter-item__search input[type="text"],.filter-item__select{
+        border: 1px solid #000000;
+        height: 48px;
+        padding: 12px 12px 12px 44px;
+        border-radius: 0;
+    }
+    .filter-item__select{
+        padding: 12px 20px 12px 12px;
+        line-height: 22px;
+    }
+    .filter-item__search-action{
+        right: auto;
+        left: 10px;
+    }
+    .filter-item__select--arrow:after{
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        right: 12px;
+    }
+    .more-filters-btn{
+        background-color: #2765F1;
+        height: 48px;
+        color: #fff !important;
+    }
+    .filters-layout__item.filters-layout__item-first {
+        flex: 0 0 25%;
+    }
+    .more-filters-btn svg {
+        margin-right: 15px;
+    }
+    @media (min-width: 1499px){
+        .section-filters .container,.custom-width-container{
+            max-width: 1800px;
+            width: 100%;
+        }
+    }
+
+</style>
+<section class="section  section--listing">
     <div class="section-filters">
         <?php echo $srchFrm->getFormTag(); ?>
         <div class="container container--narrow">
@@ -234,10 +301,13 @@ $jslabels = json_encode([
                         <div class="filters-layout__item filters-layout__item-fifth">
                             <div class="filter-item">
                                 <div class="filter-item__trigger cursor-pointer more-filters filter-item__trigger-js filter-more-js">
-                                    <span class="filters-count filters-count--positioned more-count-js" style="display: none;"></span>
+                                    <div class="filter-item__label">
+                                        &nbsp;
+                                        <span class="filters-count filters-count--positioned more-count-js" style="display: none;"></span>
+                                    </div>
                                     <a href="javascript:void(0)" class="btn more-filters-btn color-primary">
-                                        <svg class="icon icon--more icon--small margin-right-2" viewBox="0 0 14 14.003">
-                                        <path d="M2.919 11.202a2.1 2.1 0 013.962 0H14v1.4H6.881a2.1 2.1 0 01-3.962 0H0v-1.4zm4.2-4.9a2.1 2.1 0 013.962 0H14v1.4h-2.919a2.1 2.1 0 01-3.962 0H0v-1.4zm-4.2-4.9a2.1 2.1 0 013.962 0H14v1.4H6.881a2.1 2.1 0 01-3.962 0H0v-1.4z"></path>
+                                        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M17.5 2H0.5C0.22386 2 0 1.77614 0 1.5V0.5C0 0.22386 0.22386 0 0.5 0H17.5C17.7761 0 18 0.22386 18 0.5V1.5C18 1.77614 17.7761 2 17.5 2ZM15 7.5V6.5C15 6.2239 14.7761 6 14.5 6H3.5C3.22386 6 3 6.2239 3 6.5V7.5C3 7.7761 3.22386 8 3.5 8H14.5C14.7761 8 15 7.7761 15 7.5ZM12 12.5V13.5C12 13.7761 11.7761 14 11.5 14H6.5C6.22386 14 6 13.7761 6 13.5V12.5C6 12.2239 6.22386 12 6.5 12H11.5C11.7761 12 12 12.2239 12 12.5Z" fill="white"/>
                                         </svg>
                                         <?php echo Label::getLabel('LBL_MORE_FILTERS'); ?>                                        
                                     </a>
@@ -574,7 +644,7 @@ $jslabels = json_encode([
         <input type="text" name="pageno" value="<?php echo $pageno->value; ?>" style="display: none;" />
         </form>
     </div>
-    <div class="container container--narrow">
+    <div class="container custom-width-container">
         <div class="page-listing" id="listing"></div>
     </div>
 </section>

@@ -18,6 +18,24 @@
                     <span><?php echo Label::getLabel('LBL_ACCOUNT_SETTINGS'); ?></span>
                 </a>
             </li>
+            <li class="menu__item">
+                <a href="<?php echo MyUtility::makeUrl('Teachers', '', [], CONF_WEBROOT_FRONT_URL); ?>">
+                    <svg class="icon icon--small icon--user-search margin-right-4">
+                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#user-search'; ?>"></use>
+                    </svg>
+                    <span><?php echo Label::getLabel('LBL_FIND_A_TEACHER'); ?></span>
+                </a>
+            </li>
+            <!-- <?php if ($siteUser['user_is_teacher'] == AppConstant::NO) { ?>
+                <li class="menu__item">
+                    <a href="<?php echo MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" target="_blank">
+                        <svg class="icon icon--small icon--user-search margin-right-4">
+                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#apply-to-teach'; ?>"></use>
+                        </svg>
+                        <span><?php echo Label::getLabel('LBL_BECOME_A_TUTOR'); ?></span>
+                    </a>
+                </li>
+            <?php } ?> -->
         </ul>
     </nav>
 </div>
@@ -25,6 +43,14 @@
     <h6 class="heading-6"><?php echo Label::getLabel('LBL_BOOKING'); ?></h6>
     <nav class="menu menu--primary">
         <ul>
+            <li class="menu__item <?php echo ($controllerName == "Teachers") ? 'is-active' : ''; ?>">
+                <a href="<?php echo MyUtility::makeUrl('Teachers'); ?>">
+                    <svg class="icon icon--students margin-right-2">
+                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#students'; ?>"></use>
+                    </svg>
+                    <span><?php echo Label::getLabel('LBL_MY_TEACHERS'); ?></span>
+                </a>
+            </li>
             <li class="menu__item <?php echo ($controllerName == "Lessons" && $action == 'index') ? 'is-active' : ''; ?>">
                 <a href="<?php echo MyUtility::makeUrl('Lessons'); ?>">
                     <svg class="icon icon--lesson margin-right-2">
@@ -49,6 +75,14 @@
                     <span><?php echo Label::getLabel('LBL_CLASS_PACKAGES'); ?></span>
                 </a>
             </li>
+			<li class="menu__item <?php echo ($controllerName == "Courses") ? 'is-active' : ''; ?>">
+                <a href="<?php echo MyUtility::makeUrl('Courses'); ?>">
+                    <svg class="icon icon--group-classes margin-right-2">
+                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#group-classes'; ?>"></use>
+                    </svg>
+                    <span><?php echo Label::getLabel('LBL_COURSES'); ?></span>
+                </a>
+            </li>
             <li class="menu__item <?php echo ('Subscriptions' == $controllerName && 'index' == $action) ? 'is-active' : ''; ?>">
                 <a href="<?php echo MyUtility::makeUrl('Subscriptions'); ?>">
                     <svg class="icon icon--lesson margin-right-2">
@@ -65,14 +99,14 @@
                     <span><?php echo Label::getLabel('LBL_REPORTED_ISSUES'); ?></span>
                 </a>
             </li>
-            <li class="menu__item <?php echo ($controllerName == "Teachers") ? 'is-active' : ''; ?>">
+			<li class="menu__item <?php echo ($controllerName == "Teachers") ? 'is-active' : ''; ?>">
                 <a href="<?php echo MyUtility::makeUrl('Teachers'); ?>">
                     <svg class="icon icon--students margin-right-2">
-                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#students'; ?>"></use>
+                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#students'; ?>"></use>
                     </svg>
                     <span><?php echo Label::getLabel('LBL_MY_TEACHERS'); ?></span>
                 </a>
-            </li>
+            </li> 
         </ul>
     </nav>
 </div>
@@ -129,24 +163,34 @@
                     <span><?php echo Label::getLabel('LBL_Gift_Cards'); ?></span>
                 </a>
             </li>
-            <li class="menu__item">
+			 <li class="menu__item">
                 <a href="<?php echo MyUtility::makeUrl('Teachers', '', [], CONF_WEBROOT_FRONT_URL); ?>" target="_blank">
                     <svg class="icon icon--small icon--user-search margin-right-4">
-                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#user-search'; ?>"></use>
+                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#user-search'; ?>"></use>
                     </svg>
                     <span><?php echo Label::getLabel('LBL_FIND_A_TEACHER'); ?></span>
                 </a>
             </li>
-            <?php if ($siteUser['user_is_teacher'] == AppConstant::NO) { ?>
+            <?php /*if ($siteUser['user_is_teacher'] == AppConstant::NO) { ?>
                 <li class="menu__item">
                     <a href="<?php echo MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" target="_blank">
                         <svg class="icon icon--small icon--user-search margin-right-4">
-                        <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#apply-to-teach'; ?>"></use>
+                            <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#apply-to-teach'; ?>"></use>
                         </svg>
                         <span><?php echo Label::getLabel('LBL_APPLY_TO_TEACH'); ?></span>
                     </a>
                 </li>
-            <?php } ?>
+            <?php }  ?>
+            <?php if ($siteUserType == User::LEARNER) { ?>
+                <li class="menu__item <?php echo ($controllerName == "FavoriteCourses") ? 'is-active' : ''; ?>">
+                    <a href="<?php echo MyUtility::makeUrl('FavoriteCourses', ''); ?>">
+                        <svg class="icon icon--small icon--favorites icon--user-search margin-right-4">
+                            <use xlink:href="<?php echo CONF_WEBROOT_DASHBOARD . 'images/sprite.svg#favorite'; ?>"></use>
+                        </svg>
+                        <span><?php echo Label::getLabel('LBL_FAVORITE_COURSES'); ?></span>
+                    </a>
+                </li>
+            <?php }*/ ?>
         </ul>
     </nav>
 </div>

@@ -197,7 +197,14 @@ class WalletController extends DashboardController
         }
         $payoutMethodId = FatApp::getPostedData('methodId', FatUtility::VAR_INT, 0);
         $frm = $this->getWithdrawalForm($payoutMethodId, $balance);
-        $data = (new User($this->siteUserId))->getUserBankInfo();
+        if($payoutMethodId == 11){
+            $data = (new User($this->siteUserId))->getStripeDetail($this->siteUserId);
+            if(empty($data)){
+                FatUtility::dieJsonError('Please set your Stripe connect detail in Profile Settings/Payments/Stripe Connect');
+            }
+        }else{
+            $data = (new User($this->siteUserId))->getUserBankInfo();
+        }
         $frm->fill($data);
         $this->sets(['frm' => $frm]);
         $this->_template->render(false, false);
@@ -288,10 +295,26 @@ class WalletController extends DashboardController
         }
         $post['withdrawal_transaction_fee'] = $fee;
         $userObj = new User($userId);
-        $saveInfoFunction = ($pmethodCode == BankPayout::KEY) ? 'updateBankInfo' : 'updatePaypalInfo';
-        if (!$userObj->$saveInfoFunction($post)) {
-            Label::getLabel($userObj->getError());
+        if($pmethodCode == BankPayout::KEY){
+            $saveInfoFunction = 'updateBankInfo';
+        }elseif($pmethodCode == StripeConnect::KEY){
+            $saveInfoFunction = 'StripeConnectWithdrawal';
+        }else{
+            $saveInfoFunction = 'updatePaypalInfo';
         }
+        if($saveInfoFunction == 'StripeConnectWithdrawal'){
+            $stripe = $userObj->$saveInfoFunction($post);
+            if(isset($stripe['status']) && $stripe['status'] == 0){
+                FatUtility::dieJsonError($stripe['msg']);
+                return false;
+            }
+        }else{
+            if (!$userObj->$saveInfoFunction($post)) {
+                Label::getLabel($userObj->getError());
+                return false;
+            }
+        }
+        
         if (!$withdrawRequestId = $userObj->addWithdrawalRequest(array_merge($post, ["ub_user_id" => $userId]), $this->siteLangId)) {
             FatUtility::dieJsonError($userObj->getError());
         }
@@ -300,7 +323,14 @@ class WalletController extends DashboardController
         $withdrawRequestData['user_first_name'] = $this->siteUser['user_first_name'];
         $withdrawRequestData['user_last_name'] = $this->siteUser['user_last_name'];
         $withdrawRequestData['user_email'] = $this->siteUser['user_email'];
-        $withdrawRequestData['payout_type'] = ($pmethodCode == BankPayout::KEY) ? Label::getLabel('Lbl_Bank_Payout') : Label::getLabel('Lbl_Paypal_Payout');
+        if($pmethodCode == BankPayout::KEY){
+            $withdrawRequestData['payout_type'] = Label::getLabel('Lbl_Bank_Payout');
+        }elseif($pmethodCode == StripeConnect::KEY){
+            $withdrawRequestData['payout_type'] = 'Stripe Connect';
+        }else{
+            $withdrawRequestData['payout_type'] = Label::getLabel('Lbl_Paypal_Payout');
+        }
+        // $withdrawRequestData['payout_type'] = ($pmethodCode == BankPayout::KEY) ? Label::getLabel('Lbl_Bank_Payout') : Label::getLabel('Lbl_Paypal_Payout');
         $fatTemplate = new FatTemplate(' ', ' ');
         $fatTemplate->set('data', $withdrawRequestData);
         $fatTemplate->set('pmethodCode', $pmethodCode);

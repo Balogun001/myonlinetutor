@@ -280,6 +280,17 @@
                     </ul>
                 </li>
             <?php } ?>
+            <?php
+            if (
+                $objPrivilege->canViewLessonLanguages(true) || $objPrivilege->canViewClassLanguages(true) ||
+                $objPrivilege->canViewTeacherPerformance(true) || $objPrivilege->canViewLessonStatsReport(true) ||
+                $objPrivilege->canViewSalesReport(true) || $objPrivilege->canViewSettlementsReport(true)
+            ) {
+            ?>
+                <li>
+                    <a href="<?php echo MyUtility::makeUrl('Affiliate'); ?>"><?php echo Label::getLabel('LBL_AFFILIATES'); ?></a>
+                </li>
+            <?php } ?>
             <!--  ] -->
         </ul>
     </div>

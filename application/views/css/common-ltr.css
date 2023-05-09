@@ -633,7 +633,6 @@ ul {
         -ms-flex-pack: justify;
             justify-content: space-between;
     background-color: #fff;
-    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 2;
@@ -696,7 +695,6 @@ ul {
             justify-content: space-between;
     position: relative;
     background-color: #fff;
-    position: -webkit-sticky;
     position: sticky; }
     .box--checkout .box-foot .btn {
       width: 120px;
@@ -1611,11 +1609,19 @@ ul {
     .select-dropdown__trigger.is-selected {
       color: var(--color-primary); }
       .select-dropdown__trigger.is-selected:before {
-        width: 12px;
-        height: 7px;
-        -webkit-transform: translateY(-50%) rotate(-45deg);
-            -ms-transform: translateY(-50%) rotate(-45deg);
-                transform: translateY(-50%) rotate(-45deg); }
+        position: absolute;
+        right: 20px;
+        top: 48%;
+        width: 8px;
+        height: 8px;
+        content: "";
+        border-right: 1px solid #999;
+        border-bottom: 1px solid #999;
+        border-left: 0;
+        -webkit-transform: translateY(-50%) rotate(45deg);
+            -ms-transform: translateY(-50%) rotate(45deg);
+                transform: translateY(-50%) rotate(45deg);
+        pointer-events: none; }
     .select-dropdown__trigger:not(:only-child) {
       cursor: pointer; }
   .select-dropdown__target {
@@ -5458,6 +5464,9 @@ img {
 .btn.btn--danger {
   background-color: var(--color-red); }
 
+.btn.btn--success {
+  background-color: var(--color-success); }
+
 .btn.btn--gray {
   background: #e9e8eb;
   color: #000; }
@@ -7801,7 +7810,6 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
       border-top-right-radius: var(--radius-0);
       border-bottom-right-radius: var(--radius-0); }
   .table--styled th {
-    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 1; }
@@ -7841,7 +7849,6 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
           box-shadow: 0 1px 0 0 var(--color-gray-200); }
 
 .table--sticky th {
-  position: -webkit-sticky;
   position: sticky;
   top: 0;
   background-color: var(--colors-white);
@@ -8820,6 +8827,60 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
     .timer__digit:not(:last-child):after {
       content: ":";
       margin: 0 0.1rem; }
+
+.calender-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.simple-calendar {
+  font-size: 16px; }
+
+.calender-button {
+  padding: 8px;
+  background: #f3f3f3;
+  border: 2px solid #e2e2e2;
+  font-size: 20px;
+  cursor: pointer; }
+
+.calendar-list {
+  text-align: center;
+  font-weight: 600;
+  line-height: 30px;
+  margin-top: 20px;
+  margin-bottom: 30px; }
+
+.calendar-list .date {
+  border-top: 6px solid #2ace41; }
+
+.calendar-list .date.disabled {
+  border-top-color: #bfbfbf; }
+
+.calendar-list .time {
+  color: #2ace41;
+  cursor: pointer;
+  margin-bottom: 10px; }
+
+.calendar-list .time.disabled {
+  cursor: default;
+  color: #bfbfbf; }
+
+.calendar-list .time:hover {
+  color: #63f377; }
+
+.calendar-list .time.disabled:hover {
+  color: #bfbfbf; }
+
+.calendar-list .time.active {
+  background: #2ace41;
+  color: white;
+  border-radius: 20px; }
 
 .container {
   padding-right: 15px;
@@ -10805,7 +10866,10 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
     min-width: 920px;
     padding: 20px;
     display: block;
-    overflow: auto; } }
+    overflow: auto;
+    height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden; } }
 
 @media (min-width: 991px) {
   #facebox .content.facebox-medium {
@@ -11335,7 +11399,6 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
 
 .fc .fc-scrollgrid-section-sticky > * {
   background: var(--fc-page-bg-color, #fff);
-  position: -webkit-sticky;
   position: sticky;
   z-index: 2; }
 
@@ -11350,7 +11413,6 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
   margin-bottom: -1px; }
 
 .fc-sticky {
-  position: -webkit-sticky;
   position: sticky; }
 
 .fc .fc-view-harness {
@@ -12077,7 +12139,6 @@ html[dir="rtl"] .fld-date, html[dir="rtl"] #grpcls_start_datetime, html[dir="rtl
   border-right: 0; }
 
 .fc .fc-list-sticky .fc-list-day > * {
-  position: -webkit-sticky;
   position: sticky;
   top: 0;
   background: var(--fc-page-bg-color, #fff); }
@@ -12794,13 +12855,11 @@ body[class*="jconfirm-no-scroll-"] {
   user-select: none;
   border-radius: 4px;
   min-height: 1em;
-  -webkit-transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
-  transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
   -webkit-transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
   transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
-  -o-transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
-  transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
-  transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
+  -o-transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, -webkit-box-shadow 0.1s ease;
   -webkit-tap-highlight-color: transparent;
   border: 0;
   background-image: none; }

@@ -386,8 +386,11 @@ class Cart extends FatModel
         $record->assignValues($cartData);
         if (!$record->addNew([], $cartData)) {
             $this->error = $record->getError();
+			print_r($this->error);
+			
             return false;
         }
+		
         return true;
     }
 
@@ -653,7 +656,8 @@ class Cart extends FatModel
             1 => Label::getLabel('LBL_1'),
             2 => Label::getLabel('LBL_2'),
             3 => Label::getLabel('LBL_3'),
-            4 => Label::getLabel('LBL_4')
+            4 => Label::getLabel('LBL_4'),
+            5 => Label::getLabel('LBL_5'),
         ];
     }
 

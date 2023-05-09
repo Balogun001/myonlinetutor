@@ -163,6 +163,7 @@ class LessonSearch extends YocoachSearch
         $countries = Country::getNames($this->langId, $countryIds);
         $lessonPlans = Plan::getLessonPlans($lessonIds);
         $lessonIssues = Issue::getLessonIssueIds($lessonIds);
+		$lessonQuizzes = QuizLinked::getQuizzes($lessonIds, AppConstant::LESSON);		   
         $teachLangs = TeachLanguage::getNames($this->langId, $teachLangIds);
         $title = Label::getLabel('LBL_{teach-lang},_{n}_minutes_of_Lesson');
         $freeTrialLbl = Label::getLabel('LBL_FREE_TRIAL');
@@ -179,6 +180,7 @@ class LessonSearch extends YocoachSearch
                 $row['ordles_tlang_name'] = $freeTrialLbl;
             }
             $row = array_merge($row, $lessonPlans[$row['ordles_id']] ?? ['plan_id' => 0]);
+			 $row['quiz_count'] = $lessonQuizzes[$row['ordles_id']]['quiz_count'] ?? 0;		   
             $row['lessonTitle'] = str_replace(['{teach-lang}', '{n}'], [$row['ordles_tlang_name'], $row['ordles_duration']], $title);
             $row['ordles_remaining_unix'] = 0;
             $row['ordles_endtime_remaining_unix'] = 0;
@@ -186,6 +188,8 @@ class LessonSearch extends YocoachSearch
             $row['ordles_endtime_unix'] = null;
             $row['ordles_currenttime_unix'] = $currentTimeUnix;
             if (!is_null($row['ordles_lesson_starttime'])) {
+				$row['ordles_lesson_starttime_utc'] = strtotime($row['ordles_lesson_starttime']);
+                $row['ordles_lesson_endtime_utc'] = strtotime($row['ordles_lesson_endtime']);	   
                 $row['ordles_lesson_starttime'] = MyDate::formatDate($row['ordles_lesson_starttime']);
                 $row['ordles_lesson_endtime'] = MyDate::formatDate($row['ordles_lesson_endtime']);
                 $row['ordles_starttime_unix'] = strtotime($row['ordles_lesson_starttime']);
@@ -497,6 +501,8 @@ class LessonSearch extends YocoachSearch
             'orders.order_payment_status' => 'order_payment_status',
             'orders.order_total_amount' => 'order_total_amount',
             'orders.order_addedon' => 'order_addedon',
+			'orders.order_is_trail' => 'order_is_trail',
+			'orders.order_is_refund' => 'order_is_refund',
             'ordles.ordles_id' => 'ordles_id',
             'ordles.ordles_type' => 'ordles_type',
             'ordles.ordles_order_id' => 'ordles_order_id',

@@ -124,13 +124,13 @@ $card-landscape: "card-landscape";
 
         &__colum{position: relative;
             &--first{max-width: 25%; flex: 0 0 25%; align-self: flex-start;}
-            &--second{max-width: 40%; flex: 0 0 40%;}
-            &--third{max-width: 35%; flex: 0 0 35%;}
+            &--second{max-width: 30%; flex: 0 0 30%;}
+            &--third{max-width: 45%; flex: 0 0 45%;}
 
             @media(max-width:theme('breakpoints.xxxl','value')){
                 &--first{max-width: 25%; flex: 0 0 25%; align-self: flex-start;}
-                &--second{max-width: 50%; flex: 0 0 50%;}
-                &--third{max-width: 25%; flex: 0 0 25%;}
+                &--second{max-width: 40%; flex: 0 0 40%;}
+                &--third{max-width: 35%; flex: 0 0 35%;}
             }
 
             @media(max-width:theme('breakpoints.lg','value')){

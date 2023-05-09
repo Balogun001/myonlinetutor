@@ -1,3 +1,16 @@
+<style>
+    @media only screen and (max-width: 1440px) and (min-width: 1300px) {
+        .dashboard .dashboard__primary {
+            width: calc(100% - 290px);
+        }
+
+        .dashboard-calendar table.fc-col-header,
+        .dashboard-calendar .fc-daygrid-body,
+        .dashboard-calendar .fc-scrollgrid-sync-table {
+            width: 100% !important;
+        }
+    }
+</style>
 <?php defined('SYSTEM_INIT') or die('Invalid Usage.'); ?>
 <!-- [ PAGE ========= -->
 <!-- <main class="page"> -->
@@ -5,6 +18,12 @@
     <div class="dashboard__primary">
         <div class="page__head">
             <h1><?php echo Label::getLabel('LBL_DASHBOARD') ?></h1>
+            <?php if ($siteUserType == User::TEACHER){ ?>
+            <a href="https://resources.myonlinetutor.co/tutors-guides/" target="_blank" class="ml-4 btn btn--primary"><?php echo Label::getLabel('LBL_Wallet_Guides'); ?></a>
+            <?php } ?>
+            <div style="flex-grow: 1">
+                <a href="<?php echo MyUtility::makeUrl('Learner'); ?>" style="float: right" class="ml-4 btn btn--primary"><?php echo label::getLabel('LBL_Switch_to_Learner'); ?></a>
+            </div>
         </div>
         <div class="page__body">
             <?php if (!$siteUser['profile_progress']['isProfileCompleted']) { ?>
@@ -137,7 +156,7 @@
             <div class="status-bar__head">
                 <div class="status-title">
                     <h5><?php echo Label::getLabel('LBL_UPCOMING_LESSONS'); ?></h5>
-                    <a href="<?php echo MyUtility::makeUrl('Lessons').'?ordles_status='.Lesson::SCHEDULED; ?>" class="color-secondary underline padding-top-3 padding-bottom-3"><?php echo Label::getLabel('LBL_View_All'); ?></a>
+                    <a href="<?php echo MyUtility::makeUrl('Lessons') . '?ordles_status=' . Lesson::SCHEDULED; ?>" class="color-secondary underline padding-top-3 padding-bottom-3"><?php echo Label::getLabel('LBL_View_All'); ?></a>
                 </div>
                 <div class="calendar">
                     <div id='d_calendar' class="dashboard-calendar calendar-view"></div>

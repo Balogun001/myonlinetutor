@@ -1,8 +1,9 @@
 <?php
 
+use Twilio\Rest\Client;
 /**
  * This class is used to handle Reminders
- * 
+ * test file save
  * @package YoCoach
  * @author Fatbit Team
  */
@@ -18,10 +19,19 @@ class Reminder extends FatModel
     const TYPE_LESSSON = 1;
     const TYPE_GCLASS = 2;
     const TYPE_SUBSCRIPTION = 3;
+    
+     private $account_sid;
+    private $auth_token;
+    private  $twilio_number;
+    private  $client;
 
     public function __construct()
     {
         parent::__construct();
+         $this->account_sid = 'ACdd927f4c0328b7306a8b4c4956b8c595';
+        $this->auth_token = '669575be6c654e5333a6377485003952';
+        $this->twilio_number = "+17164512898";
+        $this->client = new Client($this->account_sid ,$this->auth_token);
     }
 
     /**
@@ -57,32 +67,53 @@ class Reminder extends FatModel
      * @return bool
      */
     public function sendLessonReminder(int $type): bool
-    {
-        $type = (!in_array($type, [static::ONE_DAY, static::ONE_HOUR])) ? static::ONE_HOUR : $type;
-        $minutes = $this->getMinutes($type);
-        $srch = $this->getLessonSearchObject($type);
-        $resultSet = $srch->getResultSet();
-        $db = FatApp::getDb();
-        while ($row = $db->fetch($resultSet)) {
-            /* Send mail to teacher */
-            $teacherData = $this->formatData($row, User::TEACHER);
-            if (!$this->sendMail($teacherData, 'coming_up_lesson_reminder')) {
-                return false;
-            }
-            if (!$this->setup(static::TYPE_LESSSON, $row['ordles_id'], $row['teacher_id'], $minutes)) {
-                return false;
-            }
-            /* Send mail to learner */
-            $learnerData = $this->formatData($row, User::LEARNER);
-            if (!$this->sendMail($learnerData, 'coming_up_lesson_reminder')) {
-                return false;
-            }
-            if (!$this->setup(static::TYPE_LESSSON, $row['ordles_id'], $row['learner_id'], $minutes)) {
-                return false;
-            }
+{
+    $type = (!in_array($type, [static::ONE_DAY, static::ONE_HOUR])) ? static::ONE_HOUR : $type;
+    $minutes = $this->getMinutes($type);
+    $srch = $this->getLessonSearchObject($type);
+    $resultSet = $srch->getResultSet();
+    $db = FatApp::getDb();
+    while ($row = $db->fetch($resultSet)) {
+        /* Send mail to teacher */
+        $teacherData = $this->formatData($row, User::TEACHER);
+        if (!$this->sendMail($teacherData, 'coming_up_lesson_reminder')) {
+            return false;
         }
-        return true;
+
+        if (!$this->setup(static::TYPE_LESSSON, $row['ordles_id'], $row['teacher_id'], $minutes)) {
+            return false;
+        }
+        /* Send mail to learner */
+        $learnerData = $this->formatData($row, User::LEARNER);
+        if (!$this->sendMail($learnerData, 'coming_up_lesson_reminder')) {
+            return false;
+        }
+
+        if (!$this->setup(static::TYPE_LESSSON, $row['ordles_id'], $row['learner_id'], $minutes)) {
+            return false;
+        }
+
+        /* Send mail  changed by vinod to learner */
+        $phoneCode = (new UserSetting($row['learner_id']))->getPhoneCode();
+        $phoneNumber = (new UserSetting($row['learner_id']))->getPhoneNumber();
+        $message = "We are here to remind you of your upcoming online lesson, it will start in the next 30 mins
+Thank you for your interest in online coaching with us!";
+
+        if (!empty($phoneCode) && !empty($phoneNumber)) {
+            $phone = '+' . $phoneCode . $phoneNumber;
+            $this->sendSMS($phone, $message);
+        }
+
+        $teacherphoneCode = (new UserSetting($row['teacher_id']))->getPhoneCode();
+        $teacherphoneNumber = (new UserSetting($row['teacher_id']))->getPhoneNumber();
+
+        if (!empty($teacherphoneCode) && !empty($teacherphoneNumber)) {
+            $phone = '+' . $teacherphoneCode . $teacherphoneNumber;
+            $this->sendSMS($phone, $message);
+        }
     }
+    return true;
+}
 
     /**
      * Send Class Reminder
@@ -143,6 +174,7 @@ class Reminder extends FatModel
             if (!$this->sendMail($learnerData, 'coming_up_class_reminder')) {
                 return false;
             }
+    
             if (!$this->setup(static::TYPE_GCLASS, $class['grpcls_id'], $class['learner_id'], $minutes)) {
                 return false;
             }
@@ -160,6 +192,7 @@ class Reminder extends FatModel
             if (!$this->sendMail($teacherData, 'coming_up_class_reminder')) {
                 return false;
             }
+   
             if (!$this->setup(static::TYPE_GCLASS, $class['grpcls_id'], $class['teacher_id'], $minutes)) {
                 return false;
             }
@@ -203,7 +236,7 @@ class Reminder extends FatModel
             'learner.user_timezone as learner_timezone', 'learner.user_lang_id as learner_lang_id',
             'ordles_teacher_id as teacher_id', 'ordles_id', 'order_user_id as learner_id',
             'ordles_lesson_starttime as start', 'ordles_lesson_endtime as end', 'ordles_id as record_id',
-        ]);
+             ]);
         return $srch;
     }
 
@@ -244,8 +277,8 @@ class Reminder extends FatModel
             'learner.user_first_name as learner_first_name', 'learner.user_last_name as learner_last_name',
             'learner.user_timezone as learner_timezone', 'learner.user_lang_id as learner_lang_id',
             'grpcls.grpcls_teacher_id as teacher_id', 'grpcls_id', 'grpcls_id as record_id', 'ordcls_id',
-            'order_user_id as learner_id', 'grpcls_start_datetime as start', 'grpcls_end_datetime as end', 'grpcls.grpcls_title'
-        ]);
+            'order_user_id as learner_id', 'grpcls_start_datetime as start', 'grpcls_end_datetime as end', 'grpcls.grpcls_title',
+             ]);
         return FatApp::getDb()->fetchAll($srch->getResultSet());
     }
 
@@ -337,6 +370,25 @@ class Reminder extends FatModel
         }
         return true;
     }
+
+
+public function sendSMS(string $phone, string $message): bool
+{
+
+    $client = new Client($this->account_sid, $this->auth_token);
+    try {
+        $client->messages->create(
+            $phone,
+            array(
+                'from' => $this->twilio_number,
+                'body' => $message
+            )
+        );
+        return true;
+    } catch (exception $e) {
+        return true;
+    }
+}
 
     /**
      * Get Subscriptions

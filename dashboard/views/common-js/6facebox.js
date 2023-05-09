@@ -272,6 +272,7 @@
             $('#facebox .loading').remove();
             $(document).trigger('afterClose.facebox');
         });
+        $("#facebox .content > *").remove();
         hideOverlay();
     });
 

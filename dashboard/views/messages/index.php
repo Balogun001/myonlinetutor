@@ -1,3 +1,6 @@
+<style>
+#app-alert{display:none}
+</style>
 <?php
 $frmSrch->setFormTagAttribute('onSubmit', 'threadListing(this); return false;');
 $frmSrch->setFormTagAttribute('class', 'form form--small');
@@ -54,7 +57,7 @@ $submitFld->setWrapperAttribute('class', 'col-md-12');
                             </div>
                             <p class="-color-light"><?php echo Label::getLabel('LBL_Click_on_message_to_see_details'); ?></p>
                         </div>
-                        <div class="message-details message-details-js" style="display: none;">
+                        <div class="message-details message-details-js">
                         </div>
                     </div>
                 </div>
@@ -66,8 +69,8 @@ $submitFld->setWrapperAttribute('class', 'col-md-12');
     $(document).ready(function () {
         var threadId = "<?php echo $threadId ?>";
         if (threadId > 0) {
-            window.history.pushState('page2', document.title, fcom.makeUrl('Messages'));
-            getThread(threadId);
+			window.history.pushState('page2', document.title, fcom.makeUrl('Messages'));
+			getThread(threadId);
         }
     });
 </script> 

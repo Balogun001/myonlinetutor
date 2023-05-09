@@ -30,7 +30,7 @@ if (empty($arr_listing)) {
                 <p><?php echo CommonHelper::truncateCharacters($row['message_text'], 280); ?></p>
                 <date><?php echo MyDate::formatDate($row['message_date'], 'Y-m-d'); ?></date>
             </div>
-            <a href="javascript:void(0);" onclick="getThread(<?php echo $row['thread_id']; ?>, 1);" class="msg-list__action msg-list__action-js"></a>
+            <a href="javascript:void(0);" onclick="getThread(<?php echo $row['thread_id']; ?>, 1);" class="msg-list__action msg-list__action-js getthread" data-threadid="<?php echo $row['thread_id']; ?>"></a>
         </div>
         <?php
     }

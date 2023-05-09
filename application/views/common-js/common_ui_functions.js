@@ -58,19 +58,19 @@ $(document).ready(function () {
             didScroll = false;
         }
     }, 250);
-    function hasScrolled() {
-        var st = $(this).scrollTop();
-        if (Math.abs(lastScrollTop - st) <= delta)
-            return;
-        if (st > lastScrollTop && st > navbarHeight) {
-            $('.header').removeClass('nav-down').addClass('nav-up');
-        } else {
-            if (st + $(window).height() < $(document).height()) {
-                $('.header').removeClass('nav-up').addClass('nav-down');
-            }
-        }
-        lastScrollTop = st;
-    }
+    // function hasScrolled() {
+    //     var st = $(this).scrollTop();
+    //     if (Math.abs(lastScrollTop - st) <= delta)
+    //         return;
+    //     if (st > lastScrollTop && st > navbarHeight) {
+    //         $('.header').removeClass('nav-down').addClass('nav-up');
+    //     } else {
+    //         if (st + $(window).height() < $(document).height()) {
+    //             $('.header').removeClass('nav-up').addClass('nav-down');
+    //         }
+    //     }
+    //     lastScrollTop = st;
+    // }
     $(".settings__trigger-js").click(function () {
         var t = $(this).parents(".toggle-group").children(".settings__target-js").is(":hidden");
         $(".toggle-group .settings__target-js").hide();

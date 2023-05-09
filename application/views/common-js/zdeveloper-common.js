@@ -1,4 +1,25 @@
 /* global fcom, confWebRootUrl, SslUsed, jstz, langLbl, searchfavorites, confWebDashUrl, ALERT_CLOSE_TIME */
+if(sessionStorage.islogin){
+	/*var timer = setInterval(function () {
+		fcom.ajax(fcom.makeUrl('Dashboard', 'getBadgeCounts', [],confWebDashUrl), '', function (response) {
+			var json =$.parseJSON(response);
+				if ( json.messages > 0) {
+					let messages = (json.messages >= 100) ? '100+' : json.messages;
+					$('.message-count-js').addClass('head-count').text(messages);
+					 //alert("You have a new message!!!");
+					if (confirm('You have a new message!!!')) {
+						 clearInterval(timer);
+						 sessionStorage.clear('islogin');
+						 window.location="https://myonlinetutor.co/dashboard/messages";
+					} else {
+						sessionStorage.clear('islogin');
+						clearInterval(timer);
+					}
+					
+				}
+			});
+	}, 4000);*/
+}
 function isJson(str) {
     try {
         JSON.parse(str);
@@ -9,6 +30,7 @@ function isJson(str) {
 }
 var newsletterAjaxRuning = false;
 $(document).ready(function () {
+	
     setUpJsTabs();
     setUpGoToTop();
     toggleNavDropDownForDevices();
@@ -23,8 +45,11 @@ $(document).ready(function () {
             return;
         }
     }
+	
+		
 });
 (function ($) {
+	
     screenHeight = $(window).height() - 100;
     window.onresize = function (event) {
         screenHeight = $(window).height() - 100;
@@ -78,6 +103,7 @@ $(document).ready(function () {
         $(".tabs-content-js:first").show();
     };
     getBadgeCount = function () {
+		
         setTimeout(function () {
             fcom.ajax(fcom.makeUrl('Dashboard', 'getBadgeCounts', [], confWebDashUrl), '', function (response) {
                 if (response.notifications > 0) {
@@ -200,7 +226,14 @@ $(document).ready(function () {
             data += '&' + fcom.frmData(document.frmSearchPaging);
         }
         fcom.updateWithAjax(fcom.makeUrl('GuestUser', 'signinSetup'), data, function (res) {
-            window.location.reload();
+			//$.session.set('islogin', 1);
+			if(res.status){
+				sessionStorage.setItem("islogin",1);
+				 setTimeout(function () {
+					window.location.reload();
+				}, 2000);
+			 //window.location.reload();
+			}
         });
     };
     signupForm = function () {
@@ -217,7 +250,7 @@ $(document).ready(function () {
             $.facebox.close();
             frm.reset();
             setTimeout(function () {
-                window.location.reload();
+                window.location.href = "https://myonlinetutor.co/guest-user/login-form";
             }, 1000);
         });
     };
@@ -351,6 +384,7 @@ $(document).ready(function () {
         }
         fcom.updateWithAjax(fcom.makeUrl('GuestUser', 'resendVerificationLink', [username]));
     };
+	
     submitNewsletterForm = function (form) {
         if (newsletterAjaxRuning) {
             return false

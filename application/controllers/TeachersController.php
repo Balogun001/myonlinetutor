@@ -64,10 +64,12 @@ class TeachersController extends MyAppController
      */
     public function search()
     {
+		
         $langId = $this->siteLangId;
         $userId = $this->siteUserId;
         $userType = $this->siteUserType;
         $posts = FatApp::getPostedData();
+		
         $posts['pageno'] = $posts['pageno'] ?? 1;
         $posts['pagesize'] = AppConstant::PAGESIZE;
         $frm = TeacherSearch::getSearchForm($langId);
@@ -79,6 +81,7 @@ class TeachersController extends MyAppController
         $srch->addCondition('teacher.user_id', '!=', $userId);
         $srch->addSearchListingFields();
         $srch->addFld('us.user_trial_enabled');
+		
         $srch->applyPrimaryConditions();
         $srch->applySearchConditions($post);
         $srch->applyOrderBy($post['sorting']);
@@ -86,6 +89,8 @@ class TeachersController extends MyAppController
         $srch->setPageNumber($post['pageno']);
         $teachers = $srch->fetchAndFormat();
         $recordCount = $srch->recordCount();
+		
+		
         $this->set('post', $post);
         $this->set('teachers', $teachers);
         $this->set('recordCount', $recordCount);
@@ -151,6 +156,7 @@ class TeachersController extends MyAppController
             'teacher' => $teacher,
             'userTeachLangs' => $teachLangPrices,
             'freeTrialEnabled' => $freeTrialEnabled,
+			'reviews', FatApp::getDb()->fetchAll($srch->getResultSet()),
             'setMonthAndWeekNames' => true
         ]);
         $this->_template->addJs([

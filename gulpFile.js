@@ -1,4 +1,6 @@
+var merge = require('merge-stream');
 const {src, dest, watch, parallel} = require('gulp');
+
 const sass = require('gulp-sass')(require('sass'));
 sass.compiler = require('node-sass');
 

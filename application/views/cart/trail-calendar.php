@@ -57,5 +57,6 @@
     cart.prop.ordles_teacher_id = '<?php echo $teacher['user_id']; ?>';
     cart.prop.ordles_tlang_id = -1;
     var fecal = new FatEventCalendar('<?php echo $teacher['user_id']; ?>', '<?php echo MyDate::getOffset($siteTimezone); ?>');
-    fecal.AvailaibilityCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', true);
+    // fecal.AvailaibilityCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', true);
+    fecal.simpleCalendarTrial('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', true);
 </script>

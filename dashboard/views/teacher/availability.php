@@ -1,6 +1,33 @@
 <div class="container container--fixed">
     <div class="page__head">
         <h1><?php echo Label::getLabel('LBL_MANAGE_CALENDAR'); ?></h1>
+         <?php 
+	 if($siteUserType==1)
+	 {
+	 	//for student
+	 ?>
+      <div style="flex-grow: 1">
+    <a href="<?= $siteUser['user_is_teacher'] ? MyUtility::makeUrl('Teacher') : MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" style="float: right" class="ml-4 btn btn--primary">
+        <?php echo $siteUser['user_is_teacher'] ? label::getLabel('LBL_Switch_to_Teacher') : Label::getLabel('LBL_BECOME_A_TUTOR'); ?>
+    </a>
+</div>
+
+	<?php
+	}
+	?>
+    
+    <?php 
+	 if($siteUserType==2)
+	 {
+	 	//for teacher
+	 ?>
+      <div style="flex-grow: 1">
+                <a href="<?php echo MyUtility::makeUrl('Learner'); ?>" style="float: right" class="ml-4 btn btn--primary"><?php echo label::getLabel('LBL_Switch_to_Learner'); ?></a>
+            </div>
+
+	<?php
+	}
+	?>
     </div>
     <div class="page__body">
         <!-- [ INFO BAR ========= -->

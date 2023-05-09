@@ -957,8 +957,24 @@ $select-dropdown: "select-dropdown";
         &.is-selected  &-label{transform: translate(0, -40px); background-color: theme('color.white');font-size: 13px;color: theme('color.black');}
   
     
-        &.is-selected{ color: theme('color.primary');
-            &:before{ width:12px; height:7px;transform: translateY(-50%) rotate(-45deg);}
+        // &.is-selected{ color: theme('color.primary');
+        //     &:before{ width:12px; height:7px;transform: translateY(-50%) rotate(-45deg);}
+        // }
+        &.is-selected{
+            color: theme('color.primary');
+            &:before{
+                position: absolute;
+                right: 20px;
+                top: 48%;
+                width: 8px;
+                height: 8px;
+                content: "";
+                border-right: 1px solid #999;
+                border-bottom: 1px solid #999;
+                border-left: 0;
+                transform: translateY(-50%) rotate(45deg);
+                pointer-events: none;
+            }
         }
 
         &:not(:only-child){cursor: pointer;}

@@ -423,4 +423,59 @@ $(document).ready(function () {
     if (userTimezone == '' || userTimezone == null) {
         setCookie('CONF_SITE_TIMEZONE', timezone);
     }
+
+    window.expandTutorial = function (event) {
+        var youtubeUrl = 'https://www.youtube.com/embed/KYVJD-FyTsg';
+
+        var menu = $(event.target).prev().text().trim();
+
+        if (menu) {
+            switch (menu) {
+                case 'Manage Calendar':
+                    youtubeUrl = 'https://www.youtube.com/embed/FpkbMYXvXS8';
+                    break;
+                case 'Manage Lessons':
+                    youtubeUrl = 'https://www.youtube.com/embed/0rYcUYVN8SQ';
+                    break;
+                case 'Manage Lessons Plans':
+                    youtubeUrl = 'https://www.youtube.com/embed/5TWX4bpNgCQ';
+                    break;
+                case 'Quizzes':
+                    youtubeUrl = 'https://www.youtube.com/embed/7P_03UQV8VQ';
+                    break;
+                case 'Questions':
+                    youtubeUrl = 'https://www.youtube.com/embed/7P_03UQV8VQ';
+                    break;
+                case 'Dashboard':
+                    youtubeUrl = 'https://www.youtube.com/embed/DwNFv7GIKEY';
+                    break;
+                case 'Manage Classes':
+                    youtubeUrl = 'https://www.youtube.com/embed/3mawz89vWt0';
+                    break;
+                default:
+                    youtubeUrl = 'https://www.youtube.com/embed/KYVJD-FyTsg';
+                    break;
+            }
+        }
+
+        var accountSettingSub = $('.page-panel li.menu__item.is-active').text().trim();
+        if (accountSettingSub) {
+            switch (accountSettingSub) {
+                case 'Subjects':
+                    youtubeUrl = 'https://www.youtube.com/embed/IkLgnw2yG6Q';
+                    break;
+                case 'Payments':
+                    youtubeUrl = 'https://www.youtube.com/embed/hG-OKNqLj_M';
+                    break;
+                default:
+                    console.log('here')
+                    youtubeUrl = 'https://www.youtube.com/embed/Y_07gNEVtj0';
+                    break;
+            }
+        }
+
+        $.facebox('<iframe width="100%" height="600px" src="'+youtubeUrl+'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" class="mb-4"></iframe>', 'facebox-large');
+    };
+
+    $('.dashboard-learner .page__head h1, .dashboard-teacher .page__head h1').parent().addClass('d-flex align-items-center').find('h1').after('<button class="ml-4 btn btn--primary" id="expandVideo" onclick="expandTutorial(event)">Watch Video Tutorial</button>');
 });

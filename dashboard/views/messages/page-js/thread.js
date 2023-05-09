@@ -1,8 +1,10 @@
 /* global fcom */
 
 $(document).ready(function () {
+	
     searchThreadMessages(document.frmMessageSrch);
 });
+
 (function () {
     var dv = '#messageListing';
     searchThreadMessages = function (frm, append) {

@@ -92,7 +92,7 @@ class UserQualification extends MyAppModel
         $fld->requirements()->setInt();
         $fld = $frm->addSelectBox(Label::getLabel('LBL_Experience_Type'), 'uqualification_experience_type', UserQualification::getExperienceTypeArr(), '', [], Label::getLabel('LBL_Select'));
         $fld->requirements()->setRequired();
-        $fld = $frm->addRequiredField(Label::getLabel('LBL_Title'), 'uqualification_title', '', ['placeholder' => Label::getLabel('LBL_Eg:_B.A._English')]);
+        $fld = $frm->addRequiredField(Label::getLabel('LBL_Certification_Designation'), 'uqualification_title', '', ['placeholder' => Label::getLabel('LBL_Eg:_B.A._English')]);
         $fld->requirements()->setLength(1, 100);
         $fld = $frm->addRequiredField(Label::getLabel('LBL_Institution'), 'uqualification_institute_name', '', ['placeholder' => Label::getLabel('LBL_Eg:_Oxford_University')]);
         $fld->requirements()->setLength(1, 100);

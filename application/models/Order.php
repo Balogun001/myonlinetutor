@@ -273,12 +273,15 @@ class Order extends MyAppModel
      * @param int $addPay
      * @return bool
      */
-    public function placeOrder(int $type, int $pmethodId, int $addPay): bool
+    public function placeOrder(int $type, int $pmethodId, int $addPay, int $is_trail = 0): bool
     {
+
         if ($addPay == AppConstant::YES) {
+
             $methodId = $pmethodId;
             $balance = User::getWalletBalance($this->userId);
             $remaining = $this->getNetAmount() - $balance;
+
             if ($remaining <= 0) {
                 $this->error = Label::getLabel('LBL_INVALID_REQUEST');
                 return false;
@@ -286,20 +289,34 @@ class Order extends MyAppModel
             $wallet = PaymentMethod::getByCode(WalletPay::KEY);
             $pmethodId = FatUtility::int($wallet['pmethod_id']);
         }
+        /*else{
+			
+			$methodId = $pmethodId;
+            $balance = User::getWalletBalance($this->userId);
+            $remaining = $this->getNetAmount() - $balance;
+            if ($remaining <= 0) {
+                $this->error = Label::getLabel('LBL_INVALID_REQUEST');
+                return false;
+            }
+		}*/
+
         $currency = MyUtility::getSystemCurrency();
         $orderData = [
             'order_type' => $type,
             'order_user_id' => $this->userId,
             'order_addedon' => date('Y-m-d H:i:s'),
-            'order_total_amount' => $this->getTotal(),
+            'order_total_amount' => $this->getTotal() + FatApp::getConfig('PROCESSING_FEES'),
             'order_net_amount' => $this->getNetAmount(),
             'order_item_count' => $this->getItemCount(),
-            'order_payment_status' => AppConstant::UNPAID,
+            //'order_payment_status' => AppConstant::UNPAID,
+            'order_payment_status' => static::STATUS_COMPLETED,
             'order_discount_value' => $this->getDiscount(),
             'order_pmethod_id' => FatUtility::int($pmethodId),
             'order_currency_code' => $currency['currency_code'],
             'order_currency_value' => $currency['currency_value'],
-            'order_status' => static::STATUS_INPROCESS,
+            //'order_status' => static::STATUS_INPROCESS,
+            'order_status' => static::ISPAID,
+            'order_is_trail' => $is_trail,
         ];
         $db = FatApp::getDb();
         if (!$db->startTransaction()) {
@@ -338,10 +355,10 @@ class Order extends MyAppModel
             $db->rollbackTransaction();
             return false;
         }
-        if ($addPay && !$this->placeWalletOrder($remaining, $methodId)) {
+        /*if ($addPay && !$this->placeWalletOrder($remaining, $methodId)) {
             $db->rollbackTransaction();
             return false;
-        }
+        }*/
         if (!$db->commitTransaction()) {
             $this->error = $db->getError();
             return false;
@@ -1145,8 +1162,11 @@ class Order extends MyAppModel
                 $whereArray = ['smt' => 'ordles_order_id = ?', 'vals' => [$order['order_id']]];
                 break;
             case Order::TYPE_SUBSCR:
-                if (!$db->updateFromArray(Lesson::DB_TBL, ['ordles_status' => Lesson::CANCELLED],
-                                ['smt' => 'ordles_order_id = ?', 'vals' => [$order['order_id']]])) {
+                if (!$db->updateFromArray(
+                    Lesson::DB_TBL,
+                    ['ordles_status' => Lesson::CANCELLED],
+                    ['smt' => 'ordles_order_id = ?', 'vals' => [$order['order_id']]]
+                )) {
                     $db->rollbackTransaction();
                     $this->error = $db->getError();
                     return false;
@@ -1161,8 +1181,11 @@ class Order extends MyAppModel
                 $whereArray = ['smt' => 'ordcls_order_id = ?', 'vals' => [$order['order_id']]];
                 break;
             case Order::TYPE_PACKGE:
-                if (!$db->updateFromArray(OrderClass::DB_TBL, ['ordcls_status' => OrderClass::CANCELLED],
-                                ['smt' => 'ordcls_order_id = ?', 'vals' => [$order['order_id']]])) {
+                if (!$db->updateFromArray(
+                    OrderClass::DB_TBL,
+                    ['ordcls_status' => OrderClass::CANCELLED],
+                    ['smt' => 'ordcls_order_id = ?', 'vals' => [$order['order_id']]]
+                )) {
                     $db->rollbackTransaction();
                     $this->error = $db->getError();
                     return false;
@@ -1199,5 +1222,4 @@ class Order extends MyAppModel
         $mail->sendMail([$order['user_email']]);
         return true;
     }
-
 }

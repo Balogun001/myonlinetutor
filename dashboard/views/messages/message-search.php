@@ -1,3 +1,6 @@
+<style>
+#app-alert{display:none}
+</style>
 <?php
 defined('SYSTEM_INIT') or die('Invalid Usage.');
 if ($page == 1) {

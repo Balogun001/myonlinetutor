@@ -22,14 +22,43 @@ $frm->getField('btn_clear')->addFieldTagAttribute('onClick', 'clearSearch();');
 <div class="container container--fixed">
     <div class="page__head">
         <div class="row align-items-center justify-content-between">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <h1><?php echo Label::getLabel('LBL_MANAGE_LESSONS'); ?></h1>
+                <a href="https://www.thelessonspace.com/demo" target="_blank" class="ml-4 btn btn--primary">Start Practicing</a>
+                 <?php 
+	 if($siteUserType==1)
+	 {
+	 	//for student
+	 ?>
+      <div style="flex-grow: 1">
+    <a href="<?= $siteUser['user_is_teacher'] ? MyUtility::makeUrl('Teacher') : MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" style="float: right" class="ml-4 btn btn--primary">
+        <?php echo $siteUser['user_is_teacher'] ? label::getLabel('LBL_Switch_to_Teacher') : Label::getLabel('LBL_BECOME_A_TUTOR'); ?>
+    </a>
+</div>
+
+	<?php
+	}
+	?>
+    
+    <?php 
+	 if($siteUserType==2)
+	 {
+	 	//for teacher
+	 ?>
+      <div style="flex-grow: 1">
+                <a href="<?php echo MyUtility::makeUrl('Learner'); ?>" style="float: right" class="ml-4 btn btn--primary"><?php echo label::getLabel('LBL_Switch_to_Learner'); ?></a>
+            </div>
+
+	<?php
+	}
+	?>
+    
             </div>
             <div class="col-sm-auto">
                 <div class="buttons-group d-flex align-items-center">
                     <a href="javascript:void(0)" class="btn btn--secondary slide-toggle-js  d-flex d-sm-none">
-                        <svg class="icon icon--search icon--small margin-right-2"><use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#search'; ?>"></use></svg>
-                        <?php echo Label::getLabel('LBL_SEARCH'); ?>
+                       
+                        <?php echo Label::getLabel('LBL_SEARCH'); ?> <svg class="icon icon--search icon--small margin-right-2"><use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#search'; ?>"></use></svg>
                     </a>
                 </div>
             </div>

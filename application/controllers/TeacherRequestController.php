@@ -119,11 +119,13 @@ class TeacherRequestController extends MyAppController
     public function formStep2()
     {
         $userId = FatUtility::int($this->userId);
+		
         if ($userId < 1) {
             FatUtility::dieJsonError(Label::getLabel('LBL_INVALID_REQUEST'));
         }
         $this->attemptReachedCheck();
         $request = TeacherRequest::getRequestByUserId($userId, TeacherRequest::STATUS_PENDING);
+		
         if (empty($request)) {
             FatUtility::dieJsonError(Label::getLabel('LBL_INVALID_REQUEST'));
         }
@@ -234,6 +236,7 @@ class TeacherRequestController extends MyAppController
      */
     public function setupStep1()
     {
+		
         $userId = FatUtility::int($this->userId);
         if ($userId < 1) {
             FatUtility::dieJsonError(Label::getLabel('LBL_INVALID_REQUEST'));
@@ -315,6 +318,7 @@ class TeacherRequestController extends MyAppController
     public function setupStep2()
     {
         $userId = FatUtility::int($this->userId);
+		
         if ($userId < 1) {
             FatUtility::dieJsonError(Label::getLabel('LBL_INVALID_REQUEST'));
         }
@@ -465,7 +469,7 @@ class TeacherRequestController extends MyAppController
     {
         $frm = new Form('frmFormStep2', ['id' => 'frmFormStep2']);
         $frm->addFileUpload(Label::getLabel('LBL_Profile_Picture'), 'user_profile_image', ['onchange' => 'popupImage(this)', 'accept' => 'image/*']);
-        $frm->addTextArea(Label::getLabel('LBL_Biography'), 'tereq_biography')->requirements()->setLength(1, 500);
+        $frm->addTextArea(Label::getLabel('LBL_Biography'), 'tereq_biography')->requirements()->setLength(101, 500);
         $fld = $frm->addTextBox(Label::getLabel('LBL_Introduction_video'), 'tereq_video_link');
         $fld->requirements()->setRegularExpressionToValidate(AppConstant::INTRODUCTION_VIDEO_LINK_REGEX);
         $fld->requirements()->setCustomErrorMessage(Label::getLabel('MSG_Please_Enter_Valid_Video_Link'));
@@ -661,14 +665,34 @@ class TeacherRequestController extends MyAppController
      */
     public function teacherSetup()
     {
+		
         $frm = $this->getTeacherSignupForm();
         $post = FatApp::getPostedData();
         if (!$post = $frm->getFormDataFromArray($post)) {
             FatUtility::dieJsonError(current($frm->getValidationErrors()));
         }
+		if(isset($post['user_first_name'])){
+			$firstname=$post['user_first_name'];
+		}else{
+			$firstname='';
+		}
+		if(isset($post['user_last_name'])){
+			$lastname=$post['user_last_name'];
+		}else{
+			$lastname='';
+		}
+		
+		$data = [
+		  'email'     => $post['user_email'],
+		  'status'    => 'subscribed',
+		  'firstname' => $firstname,
+		  'lastname'  => $lastname
+		];
+		$this->syncMailchimp($data);
         if (!MyUtility::validatePassword($post['user_password'])) {
             FatUtility::dieJsonError(Label::getLabel('MSG_PASSWORD_MUST_BE_EIGHT_CHARACTERS_LONG_AND_ALPHANUMERIC'));
         }
+	
         $db = FatApp::getDb();
         $db->startTransaction();
         $userData = array_merge($post, [
@@ -677,6 +701,7 @@ class TeacherRequestController extends MyAppController
             'user_lang_id' => MyUtility::getSiteLangId(),
             'user_timezone' => MyUtility::getSiteTimezone(),
         ]);
+		
         $user = new User();
         $user->assignValues($userData);
         if (FatApp::getConfig('CONF_EMAIL_VERIFICATION_REGISTRATION') == AppConstant::NO) {
@@ -686,9 +711,11 @@ class TeacherRequestController extends MyAppController
             $user->setFldValue('user_active', AppConstant::YES);
         }
         if (!$user->save()) {
+			
             $db->rollbackTransaction();
             FatUtility::dieJsonError(Label::getLabel("MSG_USER_COULD_NOT_BE_SET"));
         }
+		
         if (!$user->setSettings($userData)) {
             $db->rollbackTransaction();
             FatUtility::dieJsonError(Label::getLabel("MSG_USER_COULD_NOT_BE_SET"));
@@ -719,7 +746,39 @@ class TeacherRequestController extends MyAppController
             'redirectUrl' => MyUtility::makeUrl('TeacherRequest', 'form')
         ]);
     }
+	/** Mail chimp **/
+	private function syncMailchimp($data) {
+		  $apiKey = '668eabf48ba2d5cd74e8679973e2d195-us8';
+		  $listId = '67c21aeaf2';
 
+		  $memberId = md5(strtolower($data['email']));
+		  $dataCenter = substr($apiKey,strpos($apiKey,'-')+1);
+		  $url = 'https://' . $dataCenter . '.api.mailchimp.com/3.0/lists/' . $listId . '/members/' . $memberId;
+		  $json = json_encode([
+			  'email_address' => $data['email'],
+			  'status'        => $data['status'], // "subscribed","unsubscribed","cleaned","pending"
+			  'merge_fields'  => [
+				  'FNAME'     => $data['firstname'],
+				  'LNAME'     => $data['lastname']
+			  ]
+		  ]);
+
+		  $ch = curl_init($url);
+
+		  curl_setopt($ch, CURLOPT_USERPWD, 'user:' . $apiKey);
+		  curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		  curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+		  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		  curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+		  $result = curl_exec($ch);
+		  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		  curl_close($ch);
+		  
+		  //return $httpCode;
+	}
+	
     /**
      * Get Teacher Signup Form
      * 

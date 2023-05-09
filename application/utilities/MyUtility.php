@@ -327,9 +327,9 @@ class MyUtility extends FatUtility
      * 
      * @return array
      */
-    public static function getCommonLabels(): array
+    public static function getCommonLabels(array $siteLanguages): array
     {
-        return [
+        $jsVariables = [
             'layoutDirection' => MyUtility::getLayoutDirection(),
             'isMandatory' => Label::getLabel('LBL_IS_MANDATORY'),
             'processing' => Label::getLabel('LBL_PROCESSING_PLEASE_WAIT'),
@@ -374,7 +374,22 @@ class MyUtility extends FatUtility
             'lessonNotAvailable' => Label::getLabel('LBL_LESSON_NOT_AVAILABLE'),
             'currencyLeft' => self::getCurrencyLeftSymbol(),
             'currencyRight' => self::getCurrencyRightSymbol(),
+            'courseSrchPlaceholder' => Label::getLabel('LBL_BY_COURSE_NAME,_TEACHER_NAME,_TAGS'),
+            'confirmRetake' => Label::getLabel('LBL_IF_YOU_RETAKE,_THE_EXISTING_PROGRESS_WILL_BE_RESET._CONTINUE?'),
+            'courseProgressPercent' => Label::getLabel('LBL_{percent}%_COMPLETED'),
+            'confirmCourseSubmission' => Label::getLabel('LBL_PLEASE_CONFIRM_YOU_WANT_TO_SUBMIT_COURSE_FOR_APPROVAL?'),
+            'searching' => Label::getLabel('LBL_Searching'),
+            'selectQuestions' => Label::getLabel('LBL_PLEASE_ADD_QUESTION(S)'),
+            'confirmQuizComplete' => Label::getLabel('LBL_ARE_YOU_SURE_YOU_WANT_TO_MARK_QUIZ_COMPLETE?'),
+            'confirmQuizReviewComplete' => Label::getLabel('LBL_ARE_YOU_SURE_YOU_WANT_TO_SUBMIT_EVALUATION?'),
+            'startRecording' => Label::getLabel('LBL_START_RECORDING'),
+            'stopRecording' => Label::getLabel('LBL_STOP_RECORDING'),
+            'removeRecording' => Label::getLabel('LBL_RECORDING_REMOVED_SUCCESSFULLY')
         ];
+        foreach ($siteLanguages as $val) {
+            $jsVariables['language' . $val['language_id']] = $val['language_direction'];
+        }
+        return $jsVariables;
     }
 
     /**
@@ -600,7 +615,7 @@ class MyUtility extends FatUtility
      */
     public static function isDemoUrl(): bool
     {
-        return (strtolower($_SERVER['SERVER_NAME']) === 'teach.yo-coach.com');
+        return (strtolower($_SERVER['SERVER_NAME']) === 'elearning.yo-coach.com');
     }
 
     /**
@@ -723,4 +738,63 @@ class MyUtility extends FatUtility
         return $frm;
     }
 
+	public static function convertDuration($duration, $hours = true, $minutes = true, $seconds = false, $format = true)
+    {
+        $formattedTime = [];
+        $time = [];
+        if ($hours) {
+            $hrs = floor($duration / 3600);
+            if ($hrs > 0) {
+                $formattedTime[] = $hrs . strtolower(Label::getLabel('LBL_H'));
+            }
+            $time[] = $hrs;
+        }
+        if ($minutes) {
+            $min = gmdate("i", $duration);
+            if ($min > 0) {
+                $formattedTime[] = $min . strtolower(Label::getLabel('LBL_M'));
+            }
+            $time[] = $min;
+        }
+        if ($seconds) {
+            $sec = gmdate("s", $duration);
+            if ($sec > 0) {
+                $formattedTime[] = $sec . strtolower(Label::getLabel('LBL_S'));
+            }
+            $time[] = $sec;
+        }
+        if ($format == true) {
+            return (count($formattedTime) > 0) ? implode(' ', $formattedTime) : '';
+        } else {
+            return (count($time) > 0 && array_sum($time) > 0) ? implode(':', $time) : '';
+        }
+    }
+
+    /**
+     * Create Slug
+     * 
+     * @param string $title
+     * @return string
+     */
+    public static function createSlug(string $title): string
+    {
+        $slug = preg_replace("/[^0-9a-zA-Z]/", "-", $title);
+        return self::removeHyphens($slug);
+    }
+
+    /**
+     * Remove Hyphens
+     * 
+     * @param string $slug
+     * @return string
+     */
+    private static function removeHyphens(string $slug): string
+    {
+        $slug = str_replace('--', '-', $slug);
+        if (strpos($slug, '--') !== false) {
+            $slug = self::removeHyphens($slug);
+        }
+        return trim($slug, "-");
+    }																
+	 
 }

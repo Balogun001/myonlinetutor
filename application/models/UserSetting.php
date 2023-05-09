@@ -71,6 +71,31 @@ class UserSetting extends FatModel
         $record = FatApp::getDb()->fetch($srch->getResultSet());
         return $record['user_google_token'] ?? '';
     }
+    
+     /**
+     * Get Google Token
+     * Change by vinod
+     * @return string
+     */
+    public function getPhoneCode(): string
+    {
+        $srch = new SearchBase(UserSetting::DB_TBL);
+        $srch->addCondition('user_id', '=', $this->userId);
+        $srch->addFld('user_phone_code');
+        $srch->doNotCalculateRecords();
+        $record = FatApp::getDb()->fetch($srch->getResultSet());
+        return $record['user_phone_code'] ?? '';
+    }
+    
+     public function getPhoneNumber(): string
+    {
+        $srch = new SearchBase(UserSetting::DB_TBL);
+        $srch->addCondition('user_id', '=', $this->userId);
+        $srch->addFld('user_phone_number');
+        $srch->doNotCalculateRecords();
+        $record = FatApp::getDb()->fetch($srch->getResultSet());
+        return $record['user_phone_number'] ?? '';
+    }
 
     /**
      * validate Booking Before function

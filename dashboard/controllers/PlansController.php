@@ -223,7 +223,7 @@ class PlansController extends DashboardController
         $frm->addHiddenField('', 'plan_id', 0)->requirements()->setInt();
         $fld = $frm->addSelectBox(Label::getLabel('LBL_LEVEL'), 'plan_level', Plan::getLevels());
         $fld->requirements()->setRequired();
-        $fld = $frm->addTextBox(Label::getLabel('LBL_TITLE'), 'plan_title');
+        $fld = $frm->addTextBox(Label::getLabel('LBL_Plan'), 'plan_title');
         $fld->requirements()->setRequired();
         $fld = $frm->addTextArea(Label::getLabel('LBL_DETAIL'), 'plan_detail');
         $fld->requirements()->setRequired();

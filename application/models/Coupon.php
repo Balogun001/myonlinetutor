@@ -108,19 +108,23 @@ class Coupon extends MyAppModel
         if (!$coupon = $this->getCoupon($code)) {
             return false;
         }
+		
         /* Minimum order value */
         if ($amount < $coupon['coupon_min_order']) {
+			
             $error = Label::getLabel('LBL_REQUIRED_MINIMUM_ORDER_AMOUNT_{value}');
             $couponMinOrder = MyUtility::formatMoney($coupon['coupon_min_order']);
             $this->error = str_replace('{value}', $couponMinOrder, $error);
             return false;
         }
+		
         /* Per user uses */
         $perUserUses = $this->getPerUserUses($coupon['coupon_id'], $userId);
         if ($coupon['coupon_user_uses'] <= $perUserUses) {
             $this->error = Label::getLabel('LBL_MAXIMUM_USES_REACHED');
             return false;
         }
+		
         /* Flat/Percent discount */
         if ($coupon['coupon_discount_type'] == AppConstant::FLAT_VALUE) {
             $coupon['coupon_discount'] = $coupon['coupon_discount_value'];
@@ -131,6 +135,7 @@ class Coupon extends MyAppModel
                 $coupon['coupon_discount'] = $coupon['coupon_max_discount'];
             }
         }
+		
         $coupon['coupon_discount'] = min($coupon['coupon_discount'], $amount);
         return $coupon;
     }

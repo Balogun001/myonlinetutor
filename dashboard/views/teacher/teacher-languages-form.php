@@ -13,8 +13,11 @@ $saveBtn = $frm->getField('submit');
 ?>
 <div class="content-panel__head">
     <div class="d-flex align-items-center justify-content-between">
-        <div>
+        <div class="d-flex"> 
             <h5><?php echo Label::getLabel('LBL_MANAGE_LANGUAGES'); ?></h5>
+            <?php if ($siteUserType == User::TEACHER){ ?>
+            <button class="ml-4 btn btn--primary" id="expandVideo" onclick="expandManageSubject()"> <?php echo Label::getLabel('LBL_Manage_Subject_And_Prices_Settings_Walkthrough'); ?> </button>
+            <?php } ?>
         </div>
         <div></div>
     </div>

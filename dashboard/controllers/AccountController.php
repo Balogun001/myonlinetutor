@@ -21,6 +21,7 @@ class AccountController extends DashboardController
 
     public function index()
     {
+
         $url = ($this->siteUserType == User::TEACHER) ? 'Teacher' : 'Learner';
         FatApp::redirectUser(MyUtility::makeUrl($url));
     }
@@ -271,8 +272,8 @@ class AccountController extends DashboardController
             FatUtility::dieJsonError($user->getError());
         }
         if (
-                $this->siteUser['user_is_teacher'] == AppConstant::YES &&
-                $this->siteUser['user_timezone'] != $post['user_timezone']
+            $this->siteUser['user_is_teacher'] == AppConstant::YES &&
+            $this->siteUser['user_timezone'] != $post['user_timezone']
         ) {
             $availability = new Availability($this->siteUserId);
             if (!$availability->removeAvailability()) {
@@ -391,7 +392,7 @@ class AccountController extends DashboardController
         $countries = Country::getAll($this->siteLangId);
         $fld = $frm->addSelectBox(Label::getLabel('LBL_COUNTRY'), 'user_country_id', array_column($countries, 'country_name', 'country_id'), FatApp::getConfig('CONF_COUNTRY', FatUtility::VAR_INT, 0), [], Label::getLabel('LBL_SELECT'));
         $fld->requirements()->setRequired(true);
-        $fld = $frm->addSelectBox(Label::getLabel('LBL_PHONE_CODE'), 'user_phone_code', array_column($countries, 'phone_code', 'country_id'), '', [], Label::getLabel('LBL_SELECT'));
+        $fld = $frm->addSelectBox(Label::getLabel('LBL_PHONE_CODE'), 'user_phone_code', array_column($countries, 'phone_code', 'country_dial_code'), '', [], Label::getLabel('LBL_SELECT'));
         $fld->requirements()->setRequired(true);
         $fld = $frm->addTextBox(Label::getLabel('LBL_PHONE'), 'user_phone_number');
         $fld->requirements()->setRequired(true);
@@ -586,6 +587,25 @@ class AccountController extends DashboardController
         $frm->addSubmitButton('', 'btn_submit', Label::getLabel('LBL_SAVE'));
         return $frm;
     }
+    public function getStripeConnectForm()
+    {
+        $frm = new Form('frmStripeInfo');
+        $frm->addHiddenField('', 'user_id', 'user_id');
+        $frm->addRequiredField(Label::getLabel('LBL_First_Name'), 'user_first_name');
+        $frm->addTextBox(Label::getLabel('LBL_Last_Name'), 'user_last_name');
+        $frm->addTextBox(Label::getLabel('LBL_Routing_Number'), 'routing_number');
+        // $frm->addTextBox(Label::getLabel('LBL_Stripe_Connect_Id'), 'stripe_connect_id');
+        $frm->addRequiredField(Label::getLabel('LBL_Email'), 'user_email');
+        $frm->addRequiredField(Label::getLabel('LBL_Account_Number'), 'account_number');
+        $countries = Country::getAll($this->siteLangId);
+        $fld = $frm->addSelectBox(Label::getLabel('LBL_COUNTRY'), 'user_country_code', array_column($countries, 'country_name', 'country_code'), FatApp::getConfig('CONF_COUNTRY', FatUtility::VAR_INT, 0), [], Label::getLabel('LBL_SELECT'));
+        $currency = Currency::getAll();
+        $fld = $frm->addSelectBox(Label::getLabel('LBL_CURRENCY'), 'user_currency', array_column($currency, 'currency_code', 'currency_code'), FatApp::getConfig('CONF_CURRENCY', FatUtility::VAR_INT, 0), [], Label::getLabel('LBL_SELECT'));
+        $fld->requirements()->setRequired(true);
+        $frm->addSubmitButton('', 'btn_submit', Label::getLabel('LBL_SAVE'));
+        $frm->addButton('', 'btn_back', Label::getLabel('LBL_Back'));
+        return $frm;
+    }
 
     /**
      * Render PayPal Email Address Form
@@ -638,6 +658,24 @@ class AccountController extends DashboardController
         $this->set('payoutMethods', $payoutMethods);
         $this->_template->render(false, false);
     }
+    public function stripeConnectForm()
+    {
+        $frm = $this->getStripeConnectForm();
+        
+        // $isTeacher = ($this->siteUserType == User::TEACHER);
+        // $userObj = new User($this->siteUserId);
+        // echo "<pre>";print_r($data);die;
+        // $userRow = User::getDetail($this->siteUserId);
+        $data = User::getStripeDetail($this->siteUserId);
+        if(empty($data)){
+            $userRow = User::getDetail($this->siteUserId);
+            $frm->fill($userRow);
+        }else{
+            $frm->fill($data);
+        }
+        $this->set('frm', $frm);
+        $this->_template->render(false, false);
+    }
 
     /**
      * Setup Bank Info
@@ -654,6 +692,24 @@ class AccountController extends DashboardController
         }
         FatUtility::dieJsonSuccess(Label::getLabel('MSG_SETUP_SUCCESSFUL'));
     }
+    public function setupStripeConnectInfo()
+    {
+        $frm = $this->getStripeConnectForm();
+        if (!$post = $frm->getFormDataFromArray(FatApp::getPostedData())) {
+            FatUtility::dieJsonError(current($frm->getValidationErrors()));
+        }
+        $userObj = new User($this->siteUserId);
+        $url = $userObj->updateStripeConnectInfo($post);
+        if(isset($url['status']) && $url['status'] == 0) {
+            FatUtility::dieJsonError($url['msg']);
+        }
+        // $label = Label::getLabel('MSG_SETUP_SUCCESSFUL');
+        // echo "<pre>";print_r($label);die;
+        // $data = object array();
+        // $data->msg = $url;
+        // $data->status = 1;
+        FatUtility::dieJsonSuccess($url);
+    }
 
     /**
      * User Logout
@@ -664,5 +720,4 @@ class AccountController extends DashboardController
         TeacherRequest::closeSession();
         FatApp::redirectUser(MyUtility::makeUrl('GuestUser', 'loginForm', [], CONF_WEBROOT_FRONT_URL));
     }
-
 }

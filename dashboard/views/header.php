@@ -26,7 +26,8 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
         $jsVariables = CommonHelper::htmlEntitiesDecode($jsVariables);
         $sslUsed = (FatApp::getConfig('CONF_USE_SSL', FatUtility::VAR_BOOLEAN, false)) ? 1 : 0;
         $websiteName = FatApp::getConfig('CONF_WEBSITE_NAME_' . $siteLangId, FatUtility::VAR_STRING, '');
-        $mainDashboardClass = (($controllerName == 'Teacher' || $controllerName == 'Learner') && $actionName == "index") ? "main-dashboard" : '';
+		
+       $mainDashboardClass = (($controllerName == 'Teacher' || $controllerName == 'Learner') && $actionName == "index") ? "main-dashboard" : '';
         ?>
         <script type="text/javascript">
             var langLbl = <?php echo json_encode(CommonHelper::htmlEntitiesDecode($jsVariables)) ?>;
@@ -62,9 +63,26 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
             </script>
         <?php } ?>
         <?php echo Common::setThemeColorStyle(true); ?>
+		 <script>
+        $(document).ready(function() {
+            <?php if ($siteUserId > 0) { ?>
+                setTimeout(getBadgeCount(), 1000);
+            <?php }
+            if (!empty($messageData['msgs'][0] ?? '')) { ?>
+                fcom.success('<?php echo $messageData['msgs'][0]; ?>');
+            <?php }
+            if (!empty($messageData['dialog'][0] ?? '')) { ?>
+                fcom.warning('<?php echo $messageData['dialog'][0]; ?>');
+            <?php }
+            if (!empty($messageData['errs'][0] ?? '')) { ?>
+                fcom.error('<?php echo $messageData['errs'][0]; ?>');
+            <?php } ?>
+        });
+    </script>
     </head>
     <?php $isPreviewOn = MyUtility::isDemoUrl() ? 'is-preview-on' : ''; ?>
     <body class="dashboard-<?php echo (($siteUserType == User::TEACHER) ? 'teacher' : 'learner') . ' ' . strtolower($controllerName) . ' ' . strtolower($actionName) . ' ' . $mainDashboardClass . ' ' . $isPreviewOn; ?>">
+	
         <?php
         if (MyUtility::isDemoUrl()) {
             include(CONF_INSTALLATION_PATH . 'restore/view/header-bar.php');
@@ -163,12 +181,19 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
                                 </li>
                             <?php } ?>
                             <li class="menu__item menu__item-logout">
-                                <a href="<?php echo MyUtility::makeUrl('Account', 'logout', [], CONF_WEBROOT_DASHBOARD); ?>" class="menu__item-trigger" title="<?php echo Label::getLabel('LBL_LOGOUT'); ?>">
+                                <!--a href="<?php echo MyUtility::makeUrl('Account', 'logout', [], CONF_WEBROOT_DASHBOARD); ?>" class="menu__item-trigger" title="<?php echo Label::getLabel('LBL_LOGOUT'); ?>">
+                                    <svg class="icon icon--logout">
+                                    <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#logout'; ?>"></use>
+                                    </svg>
+                                    <span class="sr-only"><?php echo Label::getLabel('LBL_LOGOUT'); ?></span>
+                                </a-->
+								<a href="javascript:void(0);" class="clear_session menu__item-trigger" title="<?php echo Label::getLabel('LBL_LOGOUT'); ?>">
                                     <svg class="icon icon--logout">
                                     <use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#logout'; ?>"></use>
                                     </svg>
                                     <span class="sr-only"><?php echo Label::getLabel('LBL_LOGOUT'); ?></span>
                                 </a>
+								
                             </li>
                         </ul>
                     </nav>
@@ -179,11 +204,12 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
                     <div class="sidebar__head">
                         <figure class="logo">
                             <a href="<?php echo MyUtility::makeUrl('', '', [], CONF_WEBROOT_FRONT_URL); ?>">
-                                <?php if (MyUtility::isDemoUrl()) { ?>
+                                <?php /*if (MyUtility::isDemoUrl()) { ?>
                                     <img src="<?php echo CONF_WEBROOT_FRONTEND . 'images/yocoach-logo.svg'; ?>" alt="" />
                                 <?php } else { ?>
                                     <img src="<?php echo FatCache::getCachedUrl(MyUtility::makeFullUrl('Image', 'show', array(Afile::TYPE_FRONT_LOGO, 0, Afile::SIZE_LARGE), CONF_WEBROOT_FRONT_URL), CONF_DEF_CACHE_TIME, '.jpg'); ?>" alt="<?php echo $websiteName; ?>">
-                                <?php } ?>
+                                <?php }*/ ?>
+								<img src="<?php echo CONF_WEBROOT_FRONTEND . 'images/logo-online-tutor.png'; ?>" alt="<?php echo $websiteName; ?>" />
                             </a>
                         </figure>
                         <?php if (!isset($flashcardSrchFrm)) { ?>
@@ -220,8 +246,7 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
                                                 </td>
                                             </tr>
                                         </table>
-                                        <span class="-gap-10"></span>
-                                        <div class="btns-group">
+                                        <!-- <div class="btns-group">
                                             <?php if ($siteUserType == User::TEACHER) { ?>
                                                 <?php if (!empty($profileProgress['isProfileCompleted'])) { ?>
                                                     <a href="<?php echo MyUtility::makeFullUrl('teachers', 'view', [$siteUser['user_username']], CONF_WEBROOT_FRONTEND); ?>" class="btn btn--bordered color-third btn--block margin-top-2"><?php echo label::getLabel('LBL_View_Public_Profile'); ?></a>
@@ -234,7 +259,7 @@ $stickyDemoHeader = MyUtility::isDemoUrl() ? 'sticky-demo-header' : '';
                                                 <a href="<?php echo MyUtility::makeUrl('Teacher'); ?>" class="btn btn--third btn--block margin-top-4"><?php echo label::getLabel('LBL_Switch_to_Teacher_Profile'); ?></a>
                                             <?php }
                                             ?>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>

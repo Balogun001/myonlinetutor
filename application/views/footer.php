@@ -24,6 +24,35 @@ $siteEmail = FatApp::getConfig('CONF_CONTACT_EMAIL');
 $address = FatApp::getConfig('CONF_ADDRESS_' . $siteLangId, FatUtility::VAR_STRING, '');
 ?>
 </div>
+<style>
+    .footer .footer-group #mc_embed_signup{
+        background: transparent;
+    }
+    .footer .footer-group #mc_embed_signup input{
+        border: 1px solid rgba(255,255,255,0.5);
+        color: #fff;
+        background-color: transparent;
+    }
+    .footer .footer-group #mc_embed_signup form{
+        margin: 0;
+    }
+    .footer .footer-group #mc_embed_signup .helper_text{
+        display: none;
+    }
+    .footer .footer-group #mc_embed_signup div.response{
+        margin: 0 0 10px;
+        padding: 0;
+    }
+    .footer .footer-group #mc_embed_signup div#mce-responses{
+        width: 100%;
+        display: block;
+        margin: 0;
+        padding: 0;
+    }
+    .footer .footer-group  #mc_embed_signup #mc-embedded-subscribe-form div.mce_inline_error{
+        background-color: transparent;
+    }
+</style>
 <footer class="footer">
     <section class="section section--footer">
         <div class="container container--narrow">
@@ -243,7 +272,7 @@ $address = FatApp::getConfig('CONF_ADDRESS_' . $siteLangId, FatUtility::VAR_STRI
                     </div>
                 <?php } ?>
             </div>
-            <div class="row footer--row">
+            <!--div class="row footer--row">
                 <div class="col-md-12">
                     <div class="footer-group toggle-group">
                         <div class="footer__group-title toggle-trigger-js">
@@ -258,7 +287,7 @@ $address = FatApp::getConfig('CONF_ADDRESS_' . $siteLangId, FatUtility::VAR_STRI
                         </div>
                     </div>
                 </div>
-            </div>
+            </div-->
         </div>
     </section>
     <div class="section-copyright">
@@ -271,6 +300,7 @@ $address = FatApp::getConfig('CONF_ADDRESS_' . $siteLangId, FatUtility::VAR_STRI
                         <?php } else { ?>
                             <img src="<?php echo MyUtility::makeFullUrl('Image', 'show', [Afile::TYPE_FRONT_LOGO, 0, Afile::SIZE_MEDIUM]); ?>" alt="<?php echo FatApp::getConfig('CONF_WEBSITE_NAME_' . $siteLangId, FatUtility::VAR_STRING, ''); ?>">
                         <?php } ?>
+						<!--img src="<?php echo CONF_WEBROOT_FRONTEND . 'images/logo-online-tutor.png'; ?>" alt="<?php echo $websiteName; ?>" /-->
                     </a>
                 </div>
                 <p>
@@ -289,7 +319,6 @@ $address = FatApp::getConfig('CONF_ADDRESS_' . $siteLangId, FatUtility::VAR_STRI
 </footer>
 
 <a href="#top" class="gototop" title="Back to Top"></a>
-
 
 <?php if (FatApp::getConfig('CONF_ENABLE_COOKIES', FatUtility::VAR_INT, 1) && empty($cookieConsent)) { ?>
     <div class="cc-window cc-banner cc-type-info cc-theme-block cc-bottom cookie-alert no-print">
@@ -318,6 +347,60 @@ if (FatApp::getConfig('CONF_SITE_TRACKER_CODE', FatUtility::VAR_STRING, '') && !
     echo FatApp::getConfig('CONF_SITE_TRACKER_CODE', FatUtility::VAR_STRING, '');
 }
 ?>
+
+<script>
+	$( document ).ready(function() {
+		$( ".clear_session" ).click(function() {
+			sessionStorage.clear('islogin');
+			jQuery.ajax({  
+			url: fcom.makeUrl('Account', 'logout'),  
+			type: 'GET',  
+			 success: function(data) {  
+				window.location.reload("https://myonlinetutor.co/guest-user/login-form");          
+			  }  
+			});
+		});
+		$( ".clear_session_front" ).click(function() {
+			sessionStorage.clear('islogin');
+			jQuery.ajax({  
+			url: fcom.makeUrl('Dashboard/Account', 'logout'),  
+			type: 'GET',  
+			 success: function(data) {  
+				window.location.reload("https://myonlinetutor.co/guest-user/login-form");            
+			  }  
+			});
+		});
+		
+	});
+    $('.multiple-items').slick({
+        infinite: true,
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        dots: true,
+        arrows: true,
+        responsive: [
+            {
+            breakpoint: 991,
+            settings: {
+                arrows: false,
+                slidesToShow: 2,
+                slidesToScroll: 2
+            }
+            },
+            {
+            breakpoint: 480,
+            settings: {
+                arrows: false,
+                slidesToShow: 1,
+                slidesToScroll: 1
+            }
+            }
+        ]
+
+    });
+	
+</script>
+
 </body>
 
 </html>

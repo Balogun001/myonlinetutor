@@ -20,7 +20,12 @@ $defaultCurLbl = str_replace('{currency-code}', $defaultCurrency['currency_code'
 <div class="content-panel__head">
     <div class="d-sm-flex align-items-center justify-content-between">
         <div>
-            <h5><?php echo Label::getLabel('LBL_Manage_Prices'); ?></h5>
+            <div class="d-flex">
+                <h5><?php echo Label::getLabel('LBL_Manage_Price'); ?></h5>
+                <?php if ($siteUserType == User::TEACHER){ ?>
+                <button class="ml-4 btn btn--primary" id="expandVideo" onclick="expandManageSubject()"><?php echo Label::getLabel('LBL_Manage_Subject_And_Prices_Settings_Walkthrough'); ?></button>
+                <?php } ?>
+            </div>
             <p class="margin-0">
                 <?php
                 $labelText = '';

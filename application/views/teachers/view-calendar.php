@@ -25,11 +25,21 @@
         </svg>
         <p><b><?php echo Label::getLabel('LBL_NOTE:') ?></b><?php echo Label::getLabel('THIS_CALENDAR_IS_TO_ONLY_CHECK_AVAILABILITY'); ?></p>
     </div>
+	<?php 
+		$calendarDays = 490; // 70 weeks
+        /*if ($ordlesType == Lesson::TYPE_SUBCRIP) {
+            $calendarDays = FatApp::getConfig('CONF_RECURRING_SUBSCRIPTION_WEEKS') * 7;
+        }*/
+	?>
     <div id='calendar-container'>
         <div id='d_calendar'></div>
+		
+		<div id='booking2'></div>
+		<!--div id="booking" class="simple-calendar"/-->
     </div>
 </div>
 <script>
     var fecal = new FatEventCalendar('<?php echo $teacher['user_id']; ?>', '<?php echo MyDate::getOffset($siteTimezone); ?>');
-    fecal.AvailaibilityCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', false);
+   fecal.AvailaibilityCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', false);	
+	//fecal.simpleCalendar2('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $teacher['user_book_before']; ?>', <?php echo $calendarDays; ?>);
 </script>

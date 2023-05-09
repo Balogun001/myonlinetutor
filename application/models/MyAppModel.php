@@ -266,10 +266,12 @@ class MyAppModel extends FatModel
      */
     public function save()
     {
+		
         if (0 < $this->mainTableRecordId) {
             $result = $this->objMainTableRecord->update(['smt' => $this->mainTableIdField . ' = ?', 'vals' => [$this->mainTableRecordId]]);
         } else {
-            $result = $this->objMainTableRecord->addNew();
+		
+            $result = $this->objMainTableRecord->addNew(); // issue Here
             if ($result) {
                 $this->mainTableRecordId = $this->objMainTableRecord->getId();
             }
@@ -277,6 +279,7 @@ class MyAppModel extends FatModel
         if (!$result) {
             $this->error = $this->objMainTableRecord->getError();
         }
+		
         return $result;
     }
 
@@ -349,6 +352,7 @@ class MyAppModel extends FatModel
             $this->error = $this->objMainTableRecord->getError();
             return false;
         }
+		
         $this->mainTableRecordId = $this->objMainTableRecord->getId();
         return true;
     }

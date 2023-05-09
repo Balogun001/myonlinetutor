@@ -32,6 +32,16 @@ var cart = {
             fcom.error(langLbl.lessonNotAvailable);
         }
     },
+    gradeSelection: function (teacherId, tlangId, duration) {
+        cart.prop.ordles_teacher_id = teacherId;
+        cart.prop.ordles_tlang_id = (tlangId != '') ? tlangId : parseInt($('input[name="ordles_tlang_id"]:checked').val());
+        cart.prop.ordles_duration = (duration != '') ? duration : parseInt($('input[name="ordles_duration[' + cart.prop.ordles_tlang_id + ']"]:checked').val());
+        fcom.process();
+        fcom.ajax(fcom.makeUrl("Cart", "gradeSelection"), cart.prop, function (response) {
+            $.facebox(response);
+            cart.selectLanguage(cart.prop.ordles_tlang_id);
+        });
+    },
     langSlots: function (teacherId, tlangId, duration) {
         cart.prop.ordles_teacher_id = teacherId;
         cart.prop.ordles_tlang_id = (tlangId != '') ? tlangId : parseInt($('input[name="ordles_tlang_id"]:checked').val());

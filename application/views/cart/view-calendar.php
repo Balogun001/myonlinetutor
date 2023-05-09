@@ -25,7 +25,8 @@ $steps = Cart::getSteps();
         </div>
     </div>
     <div class="box__body">
-        <div id="loaderCalendar" class="calendar-loader" style="display: none;">
+        <div id="booking" class="simple-calendar"></div>
+        <!-- <div id="loaderCalendar" class="calendar-loader" style="display: none;">
             <div class="loader"></div>
         </div>
         <div class="calendar-view scheduled-lesson-popup">
@@ -63,11 +64,10 @@ $steps = Cart::getSteps();
             <div id='calendar-container'>
                 <div id='booking-calendar' class="learner_subscription_calendar"></div>
             </div>
-        </div>
+        </div> -->
         <div class="note note--secondary margin-top-4 d-flex d-xl-none align-left justify-content-start"> 
             <p><b class="margin-right-1">Note: </b><?php echo Label::getLabel('LBL_MOBILE_SELECT_SLOT_INFO') ?></p>
         </div>
-        
     </div>
     <div class="box-foot">
         <div class="box-foot__left">
@@ -100,7 +100,8 @@ $steps = Cart::getSteps();
     var labelAllScheduled = '<?php echo CommonHelper::htmlEntitiesDecode(Label::getLabel('LBL_ALL_SCHEDULED')); ?>';
     var TYPE_SUBCRIP = '<?php echo Lesson::TYPE_SUBCRIP ?>';
     var fecal = new FatEventCalendar(<?php echo $teacher['user_id']; ?>, '<?php echo MyDate::getOffset($siteTimezone); ?>');
-    fecal.bookingCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $bookBefore; ?>', '<?php echo $calendarDays; ?>');
+    // fecal.bookingCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $bookBefore; ?>', '<?php echo $calendarDays; ?>');
+    fecal.simpleCalendar('<?php echo MyDate::formatDate(date('Y-m-d H:i:s')); ?>', '<?php echo $duration; ?>', '<?php echo $bookBefore; ?>', '<?php echo $calendarDays; ?>');
     if (cart.prop.ordles_type == TYPE_SUBCRIP && Object.keys(cart.prop.slots).length == cart.prop.ordles_quantity) {
         $('#subcrip-checkout-btn-js').removeClass('btn--disabled').attr('onclick', ' cart.addSubscription();');
     }

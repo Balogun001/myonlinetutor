@@ -44,6 +44,21 @@
     </div>
 <?php } ?>
 <script>
+
+	$( document ).ready(function() {
+		$( ".clear_session" ).click(function() {
+			sessionStorage.clear('islogin');
+			jQuery.ajax({  
+			url: fcom.makeUrl('Account', 'logout'),  
+			type: 'GET',  
+			 success: function(data) {  
+				window.location.reload();            
+			  }  
+			});
+		});
+		
+	});
+								
     $(".expand-js").click(function () {
         $(".expand-target-js").slideToggle();
     });

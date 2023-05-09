@@ -1,0 +1,58 @@
+.calender-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.simple-calendar {
+    font-size: 16px;
+}
+
+.calender-button {
+    padding: 8px;
+    background: #f3f3f3;
+    border: 2px solid #e2e2e2;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.calendar-list {
+    text-align: center;
+    font-weight: 600;
+    line-height: 30px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.calendar-list .date {
+    border-top: 6px solid #2ace41;
+}
+
+.calendar-list .date.disabled {
+    border-top-color: #bfbfbf;
+}
+
+.calendar-list .time {
+    color: #2ace41;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.calendar-list .time.disabled {
+    cursor: default;
+    color: #bfbfbf;
+}
+
+.calendar-list .time:hover {
+    color: #63f377;
+}
+
+.calendar-list .time.disabled:hover {
+    color: #bfbfbf;
+}
+
+.calendar-list .time.active {
+    background: #2ace41;
+    color: white;
+    border-radius: 20px;
+}

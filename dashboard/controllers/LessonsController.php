@@ -26,6 +26,7 @@ class LessonsController extends DashboardController
     {
         $frm = LessonSearch::getSearchForm();
         $data = FatApp::getQueryStringData();
+		
         $data['ordles_status'] = $data['ordles_status'] ?? -1;
         if (!empty($data['order_id'])) {
             $data['ordles_lesson_starttime'] = '';
@@ -40,6 +41,7 @@ class LessonsController extends DashboardController
             'js/jquery.datetimepicker.js',
             'js/app.timer.js',
             'js/jquery.barrating.min.js',
+			'js/jquery.cookie.js',					  
             'js/moment.min.js',
             'js/fullcalendar-luxon.min.js',
             'js/fullcalendar.min.js',
@@ -47,7 +49,8 @@ class LessonsController extends DashboardController
             'js/fateventcalendar.js',
             'issues/page-js/common.js',
             'plans/page-js/common.js',
-            'lessons/page-js/common.js'
+            'lessons/page-js/common.js',
+			'attach-quizzes/page-js/index.js'							 
         ]);
         $this->_template->render();
     }
@@ -164,6 +167,7 @@ class LessonsController extends DashboardController
             'issues/page-js/common.js',
             'lessons/page-js/common.js',
             'js/jquery.barrating.min.js',
+			'js/jquery.cookie.js',			 
             'js/app.timer.js',
             'js/moment.min.js',
             'js/fullcalendar-luxon.min.js',
@@ -171,6 +175,7 @@ class LessonsController extends DashboardController
             'js/fullcalendar-luxon-global.min.js',
             'js/fateventcalendar.js',
             'plans/page-js/common.js',
+			'attach-quizzes/page-js/index.js'							
         ]);
         if ($flashcardEnabled) {
             $this->_template->addJs('js/flashcards.js');
@@ -391,7 +396,40 @@ class LessonsController extends DashboardController
         }
         FatUtility::dieJsonSuccess(Label::getLabel('LBL_LESSON_CANCELLED_SUCCESSFULLY'));
     }
-
+	
+	/**
+     * Refund Setup
+     */
+    public function giveRefundForm()
+    {
+        $posts = FatApp::getPostedData();
+	
+		$db = FatApp::getDb();
+		$sql="SELECT ordpay_txn_id FROM tbl_order_payments where ordpay_order_id=".$posts['orderId']; 
+		$rs = $db->query($sql); 
+		$records=$db->fetchAll($rs);
+		try {  
+			if($records[0]['ordpay_txn_id']){
+				$stripe = new \Stripe\StripeClient(
+				'sk_test_51Lh61wK8ksXj56p01WoCdMy0C14k37q0ftnDUnGi2JAaJ6xeQX6xtlgoHGJfZMP7kxICrBvpfiib4thVuOlDaWRs00MiNz81Q7'
+				);
+				$stripe->refunds->create([
+				  'charge' => $records[0]['ordpay_txn_id'],
+				]);
+			}else{
+				throw new Exception("Something Went Wrong!!!");  
+			}
+		}  
+		catch (Exception $e) {  
+		   echo 'Exception Message: ' .$e->getMessage();  
+		}  
+		finally { 
+			$sql1="UPDATE tbl_orders SET order_is_refund = 1 where order_id=".$posts['orderId']; 
+			$rs1 = $db->query($sql1); 
+		   FatUtility::dieJsonSuccess(Label::getLabel('LBL_LESSON_REFUND_SUCCESSFULLY'));
+		}  
+    }
+	
     /**
      * Render Feedback Form
      */
@@ -555,7 +593,10 @@ class LessonsController extends DashboardController
             $view = 'lessons/short-detail-listing.php';
             $allLessons = $srch->groupDates($srch->fetchAndFormat());
         }
-        $this->set('allLessons', $allLessons);
+        $this->sets([
+            'userType' => $this->siteUserType,
+            'allLessons' => $allLessons
+        ]);
         $this->_template->render(false, false, $view);
     }
 

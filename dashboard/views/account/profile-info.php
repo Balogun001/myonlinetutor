@@ -7,8 +7,39 @@
 <div class="container container--fixed">
     <div class="page__head">
         <h1><?php echo Label::getLabel('LBL_ACCOUNT_SETTINGS'); ?></h1>
+     <?php 
+	 if($siteUserType==1)
+	 {
+	 	//for student
+	 ?>
+      <div style="flex-grow: 1">
+    <a href="<?= $siteUser['user_is_teacher'] ? MyUtility::makeUrl('Teacher') : MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" style="float: right" class="ml-4 btn btn--primary">
+        <?php echo $siteUser['user_is_teacher'] ? label::getLabel('LBL_Switch_to_Teacher') : Label::getLabel('LBL_BECOME_A_TUTOR'); ?>
+    </a>
+</div>
+
+	<?php
+	}
+	?>
+    
+    <?php 
+	 if($siteUserType==2)
+	 {
+	 	//for teacher
+	 ?>
+      <div style="flex-grow: 1">
+                <a href="<?php echo MyUtility::makeUrl('Learner'); ?>" style="float: right" class="ml-4 btn btn--primary"><?php echo label::getLabel('LBL_Switch_to_Learner'); ?></a>
+            </div>
+
+	<?php
+	}
+	?>
+
     </div>
     <div class="page__body">
+    
+   
+    
         <?php if ($siteUserType == User::TEACHER) { ?>
             <!-- [ INFO BAR ========= -->
             <div class="infobar">
@@ -92,7 +123,9 @@
                                 </a>
                             </li>
                         <?php } ?>
-                        <?php if (count($payoutMethods)) { ?>
+                        <?php
+					
+						 if (count($payoutMethods)) { ?>
                             <?php $paymentFormAction = isset($payoutMethods[BankPayout::KEY]) ? 'bankInfoForm();' : 'paypalEmailAddressForm();'; ?>
                             <li class="menu__item">
                                 <a href="javascript:void(0);" class="teacher-bankinfo-js" onClick="<?php echo $paymentFormAction; ?>">
@@ -133,3 +166,10 @@
     <!-- ] -->
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        <?php if(isset($_GET['msg']) && $_GET['msg'] == 'success'){  ?>
+            var msg_res;
+            msg_res.msg = 'Data updated successfully';
+            $.facebox(msg_res, 'facebox-large')
+        <?php } ?>
+    </script>

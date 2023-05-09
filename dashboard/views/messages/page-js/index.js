@@ -1,5 +1,24 @@
 /* global fcom, langLbl */
 $(document).ready(function () {
+	//getThread(sessionStorage.getItem('threadId'), 1);
+	//setInterval(getMessageCount, 5000);
+	   /*var git = setInterval(function () {
+           fcom.updateWithAjax(fcom.makeUrl('Messages', 'getUnreadCount'), '', function (response) {
+				if (response.messCount > 0) {
+					let messages = (response.messCount >= 100) ? '100+' : response.messCount;
+					console.log(response)
+					//$('.message-badge').attr('data-count', messages);
+					//console.log($('.getthread').attr('data-ThreadId'));
+					//console.log($(".is-getthread").children(".getthread").attr("data-threadid"));
+					getThread($(".is-getthread").children(".getthread").attr("data-threadid"),1);
+					//getThread(83,1);
+					
+				}
+				$('.message-badge').removeAttr("data-count");
+			});
+        }, 2000);*/
+		
+	//setInterval(getThread,2000,83,1);
     var frm = document.frmMessageSrch;
     threadListing(frm);
     $(".window__search-field-js").click(function () {
@@ -7,12 +26,15 @@ $(document).ready(function () {
     });
     if (sessionStorage.getItem('threadId') != null) {
         getThread(sessionStorage.getItem('threadId'));
-        sessionStorage.removeItem('threadId');
+		sessionStorage.removeItem('threadId');
     }
     $(".msg-list__action-js").click(function () {
+		alert();
+		$(".msg-list__action-js").removeClass("active-chat");
         $(this).parent().toggleClass("is-active");
         $(".message-details-js").show();
         $("html").addClass("show-message-details");
+		$(this).addClass("active-chat");
         return false;
     });
     $(".msg-close-js").click(function () {
@@ -25,6 +47,9 @@ $(document).ready(function () {
             sendMessage(document.frmSendMessage);
         }
     })
+	$(".is-read").addClass("is-active");
+	$(".message-details-js").show();
+	$("html").addClass("show-message-details");
 });
 var messageThreadPage = 1;
 var messageThreadAjax = false;
@@ -35,14 +60,21 @@ function threadListing(frm, id) {
     fcom.ajax(fcom.makeUrl('Messages', 'search'), data, function (res) {
         $(div).html(res);
     });
-    $(".window__search-form-js").hide();
+	console.log(id);
+	setTimeout(function() {
+		$('.msg-list-'+id).addClass('is-read is-active is-getthread');
+	}, 4000);
+	 //$('.msg-list-' + id).addClass('is-read is-active is-getthread');
+	
+   $(".window__search-form-js").hide();
 }
+
 function getMessageCount() {
     fcom.updateWithAjax(fcom.makeUrl('Messages', 'getUnreadCount'), '', function (response) {
         if (response.messCount > 0) {
             let messages = (response.messCount >= 100) ? '100+' : response.messCount;
             $('.message-badge').attr('data-count', messages);
-            return;
+            return true;
         }
         $('.message-badge').removeAttr("data-count");
     });
@@ -59,6 +91,7 @@ function closethread() {
     $("body .message-details-js").hide();
     $("html").removeClass("show-message-details");
 }
+
 function getThread(id, page) {
     page = (page) ? page : messageThreadPage;
     if (page == 1) {
@@ -67,11 +100,12 @@ function getThread(id, page) {
     if (messageThreadAjax) {
         return false;
     }
-    $('.msg-list').removeClass('is-active');
-    $('.msg-list-' + id).addClass('is-read is-active');
+    $('.msg-list').removeClass('is-active is-getthread');
+    $('.msg-list-' + id).addClass('is-read is-active is-getthread');
     messageThreadPage += 1;
     dv = ".message-details-js";
     var data = "thread_id=" + id + "&page=" + page;
+	
     fcom.ajax(fcom.makeUrl('Messages', 'messageSearch'), data, function (ans) {
         var data = JSON.parse(ans);
         if (page == 1) {
@@ -87,6 +121,7 @@ function getThread(id, page) {
     //threadListing(document.frmMessageSrch, id);
     getMessageCount();
 }
+//setInterval(getMessageCount, 500);
 function sendMessage(frm) {
     if (document.getElementById('message_file').files.length < 1) {
         if (!$(frm).validate()) {
@@ -96,10 +131,14 @@ function sendMessage(frm) {
     fcom.process();
     var formData = new FormData(frm);
     fcom.ajaxMultipart(fcom.makeUrl('Messages', 'sendMessage'), formData, function (data) {
+		var id=$(".is-getthread").children(".getthread").attr("data-threadid");
         messageThreadPage = 1;
         getThread(data.threadId);
-        threadListing(document.frmMessageSrch);
+        threadListing(document.frmMessageSrch,id);
+		
     }, {fOutMode: 'json'});
+	//var id=$(".is-getthread").children(".getthread").attr("data-threadid");
+	
     return false;
 }
 

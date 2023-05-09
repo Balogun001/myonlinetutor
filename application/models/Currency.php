@@ -51,10 +51,13 @@ class Currency extends MyAppModel
      * @param int $langId
      * @return bool|array
      */
-    public static function getCurrencyNameWithCode(int $langId)
+    public static function getCurrencyNameWithCode(int $langId = 0)
     {
-        $srch = self::getSearchObject($langId);
-        $srch->addMultipleFields(['currency_id', 'CONCAT(IFNULL(curr_l.currency_name,curr.currency_code)," (",currency_code ,")") as currency_name_code']);
+        if($langId != 0){
+            $srch = self::getSearchObject($langId);
+        }
+        
+        $srch->addMultipleFields(['currency_id', 'CONCAT(IFNULL(curr_l.currency_name,curr.currency_code)," (",currency_code ,")") as currency_name_code','currency_code']);
         $srch->doNotCalculateRecords();
         $srch->doNotLimitRecords();
         $row = FatApp::getDb()->fetchAllAssoc($srch->getResultSet(), 'currency_id');
@@ -62,6 +65,19 @@ class Currency extends MyAppModel
             return false;
         }
         return $row;
+    }
+    public static function getAll(): array
+    {
+        $srch = new SearchBase(static::DB_TBL, 'currencies');
+        $srch->addMultipleFields(['currencies.*']);
+        $srch->addOrder('currency_id', 'ASC');
+        $srch->doNotCalculateRecords();
+        $resultSet = $srch->getResultSet();
+        $countries = [];
+        while ($row = FatApp::getDb()->fetch($resultSet)) {
+            $countries[$row['currency_id']] = $row;
+        }
+        return $countries;
     }
 
     /**

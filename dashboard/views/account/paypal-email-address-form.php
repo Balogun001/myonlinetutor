@@ -26,6 +26,7 @@ $btnBack->addFieldTagAttribute('onclick', 'bankInfoForm();');
                         <li><a href="javascript:void(0);" onclick="bankInfoForm();"><?php echo Label::getLabel('LBL_BANK_ACCOUNT'); ?></a></li>
                     <?php } ?>
                     <li class="is-active"><a href="javascript:void(0);"><?php echo Label::getLabel('LBL_PAYPAL_EMAIL'); ?></a></li>
+                    <li><a href="javascript:void(0);" onclick="stripeconnectform();">Stripe Connect</a></li>
                 </ul>
             </nav>
             <div class="tabs-data">

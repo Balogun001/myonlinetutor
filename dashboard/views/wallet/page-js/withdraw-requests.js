@@ -45,9 +45,9 @@ $.datepicker.setDefaults($.datepicker.regional['']);
         });
     };
     setupWithdrawalReq = function (frm) {
-        if (!$(frm).validate()) {
-            return;
-        }
+        // if (!$(frm).validate()) {
+        //     return;
+        // }
         fcom.updateWithAjax(fcom.makeUrl('Wallet', 'setupRequestWithdrawal'), fcom.frmData(frm), function (t) {
             searchWithdrawRequests(document.withdrawSrchFrm);
             $(document).trigger('close.facebox');

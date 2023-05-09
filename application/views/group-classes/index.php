@@ -12,11 +12,87 @@ $jslabels = json_encode([
         ]);
 ?>
 <script> LABELS = <?php echo $jslabels; ?>;</script> 
-<section class="section section--gray section--listing">
+
+<style>
+
+    .section-filters:after{
+        display: none;
+    }
+    .section-filters h1{
+        max-width: 1280px;
+        margin: 0 auto;
+
+    }
+    .filter-item{
+        border-right: none;
+    }
+    .filters-layout {
+        box-shadow: none;
+    }
+    .filter-item__label {
+        text-transform: capitalize;
+        font-weight: 400;
+        font-size: 16px;
+        color: #000000;
+        line-height: 24px;
+    }
+    .filter-item__search input[type="text"],.filter-item__select{
+        border: 1px solid #000000;
+        height: 48px;
+        padding: 12px 12px 12px 44px;
+        border-radius: 0;
+    }
+    .filter-item__select{
+        padding: 12px 20px 12px 12px;
+        line-height: 22px;
+    }
+    .filter-item__search-action{
+        right: auto;
+        left: 10px;
+    }
+    .filter-item__select--arrow:after{
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        right: 12px;
+    }
+    .more-filters-btn{
+        background-color: #2765F1;
+        height: 48px;
+        color: #fff !important;
+    }
+    .filters-layout__item.filters-layout__item-first {
+        flex: 0 0 25%;
+    }
+    .more-filters-btn svg {
+        margin-right: 15px;
+    }
+    .section-filters{
+        background-color: #fff;
+    }
+    @media (min-width: 1499px){
+        .section-filters .container,.custom-width-container{
+            max-width: 1800px;
+            width: 100%;
+        }
+        .section-filters h1{
+            font-weight: 700;
+            font-size: 48px;
+            line-height: 58px;
+          
+
+        }
+    }
+
+</style>
+
+
+<section class="section  section--listing">
     <div class="section-filters">
         <?php echo $srchFrm->getFormTag(); ?>
-        <div class="container container--narrow">
-            <h1 class="page-title margin-bottom-8"><?php echo Label::getLabel('LBL_CLASS_SEARCH_HEADLINE'); ?></h1>
+        <div class="container">
+            <!-- <h1 class="page-title margin-bottom-8"><?php echo Label::getLabel('LBL_CLASS_SEARCH_HEADLINE'); ?></h1> -->
+            <h1 class="page-title margin-bottom-8">Online Group classes to practice Learning together</h1>
+                      
             <div id="filter-panel" class="filter-panel">
                 <div class="filter-panel__head">
                     <h4><?php echo Label::getLabel('LBL_FILTERS'); ?></h4>
@@ -206,7 +282,7 @@ $jslabels = json_encode([
         <input type="text" name="pageno" value="<?php echo $pageno->value; ?>" style="display: none;" />
         </form>
     </div>
-    <div class="container container--narrow">
+    <div class="container custom-width-container">
         <div class="page-listing" id="listing"></div>
     </div>
 </section>

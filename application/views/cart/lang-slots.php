@@ -6,6 +6,10 @@
 </script>
 <div class="box box--checkout">
     <div class="box__head">
+        <a href="javascript:void(0);" onclick="cart.gradeSelection('<?php echo $teacher['user_id']; ?>', '<?php echo $tlangId; ?>', '<?php echo $duration; ?>');" class="btn btn--bordered color-black btn--back">
+            <svg class="icon icon--back"><use xlink:href="<?php echo CONF_WEBROOT_URL . 'images/sprite.svg#back'; ?>"></use></svg>
+            <?php echo Label::getLabel('LBL_BACK'); ?>
+        </a>
         <h4><?php echo Label::getLabel('LBL_SELECT_LANGUAGE_AND_DURATION'); ?></h4>
         <div class="step-nav">
             <ul>

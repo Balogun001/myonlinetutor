@@ -422,6 +422,8 @@ class ConfigurationsController extends AdminBaseController
                 $fld3 = $frm->addIntegerField(Label::getLabel("LBL_Default_Items_Per_Page"), "CONF_ADMIN_PAGESIZE");
                 $fld3->requirements()->setRange(1, 500);
                 $fld3->htmlAfterField = "<br><small>" . Label::getLabel("LBL_Set_number_of_records_shown_per_page_(Users,_orders,_etc)") . "</small>";
+                $fld3 = $frm->addIntegerField("Processing Fees", "PROCESSING_FEES");
+                $fld3 = $frm->addIntegerField('Affiliate Commission Fees(%)', "AFFILIATE_COMMISSION_FEES");
                 $frm->addHtml('', 'FlashCard', '<h3>' . Label::getLabel('LBL_FlashCards') . '</h3>');
                 $frm->addCheckBox(Label::getLabel("CONF_ENABLE_FLASHCARD"), 'CONF_ENABLE_FLASHCARD', 1, [], false, 0);
                 $frm->addHtml('', 'NEWSLETTER_SUBSCRIPTION', '<h3>' . Label::getLabel('LBL_NEWSLETTER_SUBSCRIPTION') . '</h3>');

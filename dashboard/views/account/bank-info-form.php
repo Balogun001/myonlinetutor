@@ -15,8 +15,11 @@ $btnBack->addFieldTagAttribute('onclick', '$(".teacher-preferences-js").trigger(
 ?>
 <div class="content-panel__head">
     <div class="d-flex align-items-center justify-content-between">
-        <div>
+        <div class="d-flex">
             <h5><?php echo Label::getLabel('LBL_Manage_Payments'); ?></h5>
+            <?php if ($siteUserType == User::TEACHER){ ?>
+            <a href="https://resources.myonlinetutor.co/tutors-guides/" target="_blank" class="ml-4 btn btn--primary"><?php echo Label::getLabel('LBL_Wallet_Guides'); ?></a>
+            <?php } ?>
         </div>
         <div><p class="color-secondary margin-bottom-0"><?php echo Label::getLabel('LBL_MANAGE_PAYMENT_INFO_TEXT'); ?></p></div>
     </div>
@@ -31,6 +34,7 @@ $btnBack->addFieldTagAttribute('onclick', '$(".teacher-preferences-js").trigger(
                     <?php if (!empty($payoutMethods[PaypalPayout::KEY])) { ?>
                         <li><a href="javascript:void(0);" onclick="paypalEmailAddressForm();"><?php echo Label::getLabel('LBL_PAYPAL_EMAIL'); ?></a></li>
                     <?php } ?>
+                    <li><a href="javascript:void(0);" onclick="stripeconnectform();">Stripe Connect</a></li>
                 </ul>
             </nav>
             <div class="tabs-data">

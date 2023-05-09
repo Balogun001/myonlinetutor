@@ -8,6 +8,11 @@ $frmSrch->setFormTagAttribute('class', 'd-none');
         <div class="dashboard__primary">
             <div class="page__head">
                 <h1><?php echo Label::getLabel('LBL_DASHBOARD'); ?></h1>
+                <div style="flex-grow: 1">
+                    <a href="<?= $siteUser['user_is_teacher'] ? MyUtility::makeUrl('Teacher') : MyUtility::makeUrl('TeacherRequest', '', [], CONF_WEBROOT_FRONT_URL); ?>" style="float: right" class="ml-4 btn btn--primary">
+                        <?php echo $siteUser['user_is_teacher'] ? label::getLabel('LBL_Switch_to_Teacher') : Label::getLabel('LBL_BECOME_A_TUTOR'); ?>
+                    </a>
+                </div>
             </div>
             <div class="page__body">
                 <div class="stats-row margin-bottom-6">
